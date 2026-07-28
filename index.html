@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pesquisa Pokémon</title>
+<meta name="description" content="Pesquisa Pokémon">
+<meta name="theme-color" content="#ef5350">
+<link rel="icon" href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png">
+<style>
+body{margin:0;font-family:Arial;background:#111;color:#fff;background-size:contain;background-repeat:no-repeat;background-position:center}
+body:before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.45)}
+main{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:40px}
+form{display:flex;width:min(700px,90vw)}
+input{flex:1;padding:15px;border-radius:30px 0 0 30px;border:0}
+button{padding:15px 20px;border:0;border-radius:0 30px 30px 0;cursor:pointer}
+#card{display:none;margin-top:25px;background:rgba(255,255,255,.12);padding:20px;border-radius:15px;max-width:500px;width:90%;backdrop-filter:blur(6px)}
+img{width:220px;display:block;margin:auto}
+</style>
+</head><body><main>
+<form id="f"><input id="q" placeholder="Pesquisar Pokémon..."><button>Pesquisar</button></form>
+<div id="card"><h2 id="n"></h2><img id="i"><p id="t"></p><p id="h"></p><p id="w"></p><p id="a"></p></div>
+</main>
+<script>
+async function bg(){
+const id=Math.floor(Math.random()*1025)+1;
+try{
+const r=await fetch("https://pokeapi.co/api/v2/pokemon/"+id);
+const d=await r.json();
+document.body.style.backgroundImage=`url(${d.sprites.other["official-artwork"].front_default})`;
+}catch(e){}
+}
+bg();setInterval(bg,600000);
+document.getElementById("f").onsubmit=async(e)=>{
+e.preventDefault();
+const v=q.value.trim().toLowerCase();
+if(!v)return;
+try{
+const r=await fetch("https://pokeapi.co/api/v2/pokemon/"+encodeURIComponent(v));
+if(!r.ok)throw Error();
+const d=await r.json();
+card.style.display="block";
+n.textContent=`${d.name} (#${d.id})`;
+i.src=d.sprites.other["official-artwork"].front_default;
+t.textContent="Tipos: "+d.types.map(x=>x.type.name).join(", ");
+h.textContent="Altura: "+(d.height/10)+" m";
+w.textContent="Peso: "+(d.weight/10)+" kg";
+a.textContent="Habilidades: "+d.abilities.map(x=>x.ability.name).join(", ");
+}catch{alert("Pokémon não encontrado.");}
+}
+</script></body></html>
