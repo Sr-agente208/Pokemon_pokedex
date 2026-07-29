@@ -280,3 +280,727 @@ font-size:18px;
 margin:10px 0;
 
 }
+<script>
+
+
+const TOTAL = 1025;
+
+let cry = "";
+
+let pokemonAtual = null;
+
+
+
+const tiposCor = {
+
+normal:"#A8A77A",
+fire:"#EE8130",
+water:"#6390F0",
+electric:"#F7D02C",
+grass:"#7AC74C",
+ice:"#96D9D6",
+fighting:"#C22E28",
+poison:"#A33EA1",
+ground:"#E2BF65",
+flying:"#A98FF3",
+psychic:"#F95587",
+bug:"#A6B91A",
+rock:"#B6A136",
+ghost:"#735797",
+dragon:"#6F35FC",
+dark:"#705746",
+steel:"#B7B7CE",
+fairy:"#D685AD"
+
+};
+
+
+
+
+// ======================
+// LOGIN
+// ======================
+
+
+window.onload=function(){
+
+
+if(!localStorage.getItem("logado")){
+
+
+window.location.href="login.html";
+
+return;
+
+}
+
+
+
+pesquisar(
+
+Math.floor(Math.random()*TOTAL)+1
+
+);
+
+
+trocarWallpaper();
+
+
+};
+
+
+
+
+
+// ======================
+// SAIR
+// ======================
+
+
+function sair(){
+
+
+localStorage.removeItem("logado");
+
+
+window.location.href="login.html";
+
+
+}
+
+
+
+
+
+
+// ======================
+// WALLPAPER
+// ======================
+
+
+async function trocarWallpaper(){
+
+
+try{
+
+
+let numero=Math.floor(Math.random()*TOTAL)+1;
+
+
+let resposta=await fetch(
+
+`https://pokeapi.co/api/v2/pokemon/${numero}`
+
+);
+
+
+
+let pokemon=await resposta.json();
+
+
+
+document.body.style.backgroundImage=
+
+`url(${pokemon.sprites.other["official-artwork"].front_default})`;
+
+
+
+}catch(e){}
+
+
+
+}
+
+
+setInterval(trocarWallpaper,600000);
+
+
+
+
+
+// ======================
+// PESQUISAR
+// ======================
+
+
+async function pesquisar(valor){
+
+
+erro.style.display="none";
+
+
+try{
+
+
+let resposta=await fetch(
+
+`https://pokeapi.co/api/v2/pokemon/${valor.toLowerCase()}`
+
+);
+
+
+
+if(!resposta.ok)
+
+throw Error();
+
+
+
+let pokemon=await resposta.json();
+
+
+
+mostrarPokemon(pokemon);
+
+
+
+}catch{
+
+
+card.style.display="none";
+
+
+erro.innerHTML="❌ Pokémon não encontrado";
+
+
+erro.style.display="block";
+
+
+}
+
+
+
+}
+
+
+
+
+
+// ======================
+// MOSTRAR POKEMON
+// ======================
+
+
+function mostrarPokemon(p){
+
+
+pokemonAtual=p;
+
+
+card.style.display="block";
+
+
+
+nomePokemon.innerHTML=
+
+p.name.charAt(0).toUpperCase()+p.name.slice(1);
+
+
+
+numeroPokemon.innerHTML=
+
+"🔢 Número: #"+p.id;
+
+
+
+pokemonImg.src=
+
+p.sprites.other["official-artwork"].front_default;
+
+
+
+altura.innerHTML=
+
+"📏 Altura: "+(p.height/10)+" m";
+
+
+
+peso.innerHTML=
+
+"⚖️ Peso: "+(p.weight/10)+" kg";
+
+
+
+habilidades.innerHTML=
+
+"⭐ Habilidades: "+
+
+p.abilities.map(
+
+a=>a.ability.name
+
+).join(", ");
+
+
+
+
+
+tipos.innerHTML="";
+
+
+
+p.types.forEach(t=>{
+
+
+tipos.innerHTML+=`
+
+
+<div class="tipo"
+
+style="background:${tiposCor[t.type.name]}">
+
+${t.type.name}
+
+</div>
+
+
+`;
+
+
+});
+
+
+
+
+hp.style.width=
+
+Math.min(p.stats[0].base_stat,100)+"%";
+
+
+atk.style.width=
+
+Math.min(p.stats[1].base_stat,100)+"%";
+
+
+def.style.width=
+
+Math.min(p.stats[2].base_stat,100)+"%";
+
+
+spd.style.width=
+
+Math.min(p.stats[5].base_stat,100)+"%";
+
+
+
+cry=p.cries?.latest || "";
+
+
+
+
+
+acoes.innerHTML=`
+
+
+<button class="botao" onclick="ouvirCry()">
+
+🔊 Ouvir Cry
+
+</button>
+
+
+
+<button class="botao" onclick="aleatorio()">
+
+🎲 Aleatório
+
+</button>
+
+
+
+<button class="botao" onclick="favoritarPokemon()">
+
+⭐ Favoritar
+
+</button>
+
+
+
+<button class="botao" onclick="baixarPDF()">
+
+📄 PDF
+
+</button>
+
+
+
+<button class="botao" onclick="baixarWord()">
+
+📝 Word
+
+</button>
+
+
+`;
+
+
+
+}
+
+
+
+
+
+
+// ======================
+// FAVORITOS
+// ======================
+
+
+function favoritarPokemon(){
+
+
+if(!pokemonAtual){
+
+return;
+
+}
+
+
+
+let favoritos = JSON.parse(
+
+localStorage.getItem("favoritos")
+
+) || [];
+
+
+
+favoritos.push({
+
+nome:pokemonAtual.name,
+
+numero:pokemonAtual.id,
+
+imagem:pokemonAtual.sprites.other["official-artwork"].front_default,
+
+tipo:pokemonAtual.types[0].type.name
+
+});
+
+
+
+localStorage.setItem(
+
+"favoritos",
+
+JSON.stringify(favoritos)
+
+);
+
+
+
+alert("⭐ Pokémon salvo!");
+
+
+
+}
+
+
+
+
+
+// ======================
+// FORM
+// ======================
+
+
+formPesquisa.addEventListener(
+
+"submit",
+
+function(e){
+
+
+e.preventDefault();
+
+
+let valor=pesquisa.value.trim();
+
+
+if(valor){
+
+pesquisar(valor);
+
+}
+
+
+}
+
+);
+
+
+
+
+
+
+// ======================
+// ALEATÓRIO
+// ======================
+
+
+function aleatorio(){
+
+
+let numero=
+
+Math.floor(Math.random()*TOTAL)+1;
+
+
+pesquisar(numero);
+
+
+}
+
+
+
+
+
+// ======================
+// CRY
+// ======================
+
+
+function ouvirCry(){
+
+
+if(cry){
+
+
+let audio=new Audio(cry);
+
+
+audio.volume=.7;
+
+
+audio.play();
+
+
+}
+
+
+}
+
+
+
+
+
+
+// ======================
+// PDF
+// ======================
+
+
+async function baixarPDF(){
+
+
+if(!pokemonAtual){
+
+alert("Pesquise um Pokémon primeiro!");
+
+return;
+
+}
+
+
+
+const {jsPDF}=window.jspdf;
+
+
+let pdf=new jsPDF();
+
+
+let p=pokemonAtual;
+
+
+
+
+pdf.setFillColor(220,40,40);
+
+pdf.rect(0,0,210,297,"F");
+
+
+
+pdf.setTextColor(255,255,255);
+
+pdf.setFontSize(30);
+
+
+pdf.text(
+
+"⚡ POKÉDEX",
+
+65,
+
+50
+
+);
+
+
+
+pdf.setFontSize(18);
+
+
+pdf.text(
+
+"Ficha Pokémon",
+
+75,
+
+70
+
+);
+
+
+
+pdf.addPage();
+
+
+
+pdf.setTextColor(0,0,0);
+
+
+
+pdf.setFontSize(22);
+
+
+pdf.text(
+
+p.name.toUpperCase(),
+
+20,
+
+30
+
+);
+
+
+
+pdf.text(
+
+"Numero: #"+p.id,
+
+20,
+
+45
+
+);
+
+
+
+pdf.text(
+
+"Tipo: "+p.types.map(t=>t.type.name).join(", "),
+
+20,
+
+160
+
+);
+
+
+
+pdf.text(
+
+"Altura: "+(p.height/10)+" m",
+
+20,
+
+175
+
+);
+
+
+
+pdf.text(
+
+"Peso: "+(p.weight/10)+" kg",
+
+20,
+
+190
+
+);
+
+
+
+pdf.save(
+
+p.name+"-pokedex.pdf"
+
+);
+
+
+}
+
+
+
+
+
+// ======================
+// WORD
+// ======================
+
+
+function baixarWord(){
+
+
+if(!pokemonAtual)return;
+
+
+
+let p=pokemonAtual;
+
+
+
+let texto=`
+
+POKÉDEX
+
+Nome: ${p.name}
+
+Número: ${p.id}
+
+Tipo: ${p.types[0].type.name}
+
+Altura: ${p.height/10}m
+
+Peso: ${p.weight/10}kg
+
+`;
+
+
+
+let arquivo=new Blob(
+
+[texto],
+
+{type:"application/msword"}
+
+);
+
+
+
+let link=document.createElement("a");
+
+
+link.href=URL.createObjectURL(arquivo);
+
+
+link.download=p.name+".doc";
+
+
+link.click();
+
+
+}
+
+
+
+
+</script>
+
+
+</body>
+
+</html>
