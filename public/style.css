@@ -125,3 +125,45 @@ color:gray;
 margin-top:8px;
 
 }
+
+.login-box{
+
+background:white;
+
+width:350px;
+
+margin:100px auto;
+
+padding:30px;
+
+border-radius:20px;
+
+text-align:center;
+
+box-shadow:0 10px 25px black;
+
+}
+
+
+.login-box input{
+
+display:block;
+
+width:90%;
+
+padding:12px;
+
+margin:15px auto;
+
+border-radius:15px;
+
+border:1px solid #ccc;
+
+}
+
+
+.login-box button{
+
+margin:10px;
+
+}

@@ -75,3 +75,80 @@ carregarRecados();
 }
 
 carregarRecados();
+
+function cadastro(){
+
+let email = prompt("Digite seu email:");
+
+let senha = prompt("Digite sua senha:");
+
+
+
+localStorage.setItem(
+"usuario",
+JSON.stringify({
+
+email: email,
+senha: senha
+
+})
+
+);
+
+
+alert("Conta criada! Agora faça login.");
+
+}
+
+
+
+function login(){
+
+let email =
+document.getElementById("email").value;
+
+
+let senha =
+document.getElementById("senha").value;
+
+
+
+let usuario =
+JSON.parse(
+localStorage.getItem("usuario")
+);
+
+
+
+if(
+usuario &&
+email === usuario.email &&
+senha === usuario.senha
+){
+
+
+localStorage.setItem(
+"logado",
+"true"
+);
+
+
+
+alert("Login realizado!");
+
+
+window.location.href="index.html";
+
+
+}
+
+else{
+
+
+alert("Email ou senha incorretos");
+
+
+}
+
+
+}
