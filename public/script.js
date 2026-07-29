@@ -1,23 +1,21 @@
 // ==============================
-// LOGIN LOCAL (SEM RAILWAY)
+// CRIAR CONTA
 // ==============================
 
+function criarConta(){
 
-// CADASTRO
 
-function cadastro(){
+let nome = document.getElementById("nome").value.trim();
 
-let nome = prompt("Digite seu nome:");
+let email = document.getElementById("email").value.trim();
 
-let email = prompt("Digite seu email:");
-
-let senha = prompt("Digite sua senha:");
+let senha = document.getElementById("senha").value.trim();
 
 
 
 if(!nome || !email || !senha){
 
-alert("Preencha tudo!");
+alert("⚠️ Preencha todos os campos!");
 
 return;
 
@@ -25,46 +23,56 @@ return;
 
 
 
+let usuario = {
+
+nome:nome,
+
+email:email,
+
+senha:senha
+
+};
+
+
+
 localStorage.setItem(
 
 "usuario",
 
-JSON.stringify({
-
-nome,
-email,
-senha
-
-})
+JSON.stringify(usuario)
 
 );
 
 
 
-alert("Conta criada! Agora faça login.");
+alert("✅ Conta criada com sucesso!");
+
+
+
+window.location.href="login.html";
+
 
 }
 
 
 
 
+
+// ==============================
 // LOGIN
+// ==============================
+
 
 function login(){
 
 
-let email =
-document.getElementById("email").value;
+let email = document.getElementById("email").value.trim();
 
-
-let senha =
-document.getElementById("senha").value;
+let senha = document.getElementById("senha").value.trim();
 
 
 
-let usuario =
-
-JSON.parse(
+let usuario = JSON.parse(
 
 localStorage.getItem("usuario")
 
@@ -83,6 +91,7 @@ usuario.senha === senha
 ){
 
 
+
 localStorage.setItem(
 
 "logado",
@@ -93,10 +102,22 @@ localStorage.setItem(
 
 
 
-alert("Login realizado!");
+localStorage.setItem(
+
+"usuarioLogado",
+
+usuario.nome
+
+);
+
+
+
+alert("🔓 Login realizado!");
+
 
 
 window.location.href="index.html";
+
 
 
 }
@@ -104,12 +125,14 @@ window.location.href="index.html";
 else{
 
 
-alert("Usuário ou senha incorretos!");
-
-}
+alert("❌ Email ou senha incorretos!");
 
 
 }
+
+
+}
+
 
 
 
@@ -147,7 +170,6 @@ function sair(){
 
 localStorage.removeItem("logado");
 
-
 localStorage.removeItem("usuarioLogado");
 
 
@@ -169,15 +191,21 @@ function favoritarPokemon(pokemon){
 
 
 
-let favoritos =
+if(!pokemon){
+
+alert("Nenhum Pokémon selecionado!");
+
+return;
+
+}
 
 
-JSON.parse(
+
+let favoritos = JSON.parse(
 
 localStorage.getItem("favoritos")
 
 ) || [];
-
 
 
 
@@ -206,6 +234,7 @@ pokemon.types[0].type.name
 
 
 
+
 localStorage.setItem(
 
 "favoritos",
@@ -216,8 +245,7 @@ JSON.stringify(favoritos)
 
 
 
-
-alert("⭐ Pokémon salvo!");
+alert("⭐ Pokémon salvo nos favoritos!");
 
 
 
@@ -236,20 +264,19 @@ function carregarFavoritos(){
 
 
 
-const lista =
+let lista = document.getElementById(
 
-document.getElementById("listaFavoritos");
+"listaFavoritos"
 
-
-
-if(!lista) return;
+);
 
 
 
-let favoritos =
+if(!lista)return;
 
 
-JSON.parse(
+
+let favoritos = JSON.parse(
 
 localStorage.getItem("favoritos")
 
@@ -257,12 +284,28 @@ localStorage.getItem("favoritos")
 
 
 
+
 lista.innerHTML="";
 
 
 
-favoritos.forEach(p=>{
 
+if(favoritos.length === 0){
+
+
+lista.innerHTML=
+
+"<h2>😢 Nenhum favorito salvo</h2>";
+
+return;
+
+
+}
+
+
+
+
+favoritos.forEach((pokemon,index)=>{
 
 
 lista.innerHTML += `
@@ -271,16 +314,25 @@ lista.innerHTML += `
 <div class="pokemon-card">
 
 
-<h2>${p.nome}</h2>
+<h2>${pokemon.nome}</h2>
 
 
-<img src="${p.imagem}" width="150">
+<img src="${pokemon.imagem}" width="150">
 
 
-<p>Tipo: ${p.tipo}</p>
+<p>🔢 Número: #${pokemon.numero}</p>
 
 
-<p>Número: #${p.numero}</p>
+<p>🌈 Tipo: ${pokemon.tipo}</p>
+
+
+
+<button onclick="removerFavorito(${index})">
+
+🗑 Remover
+
+</button>
+
 
 
 </div>
@@ -295,106 +347,41 @@ lista.innerHTML += `
 
 }
 
-function criarConta(){
-
-
-let nome =
-document.getElementById("nome").value;
-
-
-let email =
-document.getElementById("email").value;
-
-
-let senha =
-document.getElementById("senha").value;
-
-
-
-if(!nome || !email || !senha){
-
-alert("Preencha todos os campos!");
-
-return;
-
-}
-
-
-
-localStorage.setItem(
-
-"usuario",
-
-JSON.stringify({
-
-nome,
-email,
-senha
-
-})
-
-);
-
-
-
-alert("Conta criada com sucesso!");
-
-
-window.location.href="login.html";
-
-
-}
-
-function criarConta(){
-
-
-let nome = document.getElementById("nome").value;
-
-let email = document.getElementById("email").value;
-
-let senha = document.getElementById("senha").value;
-
-
-
-if(nome === "" || email === "" || senha === ""){
-
-alert("Preencha todos os campos!");
-
-return;
-
-}
 
 
 
 
-let usuario = {
+// ==============================
+// REMOVER FAVORITO
+// ==============================
 
-nome:nome,
 
-email:email,
+function removerFavorito(index){
 
-senha:senha
 
-};
+let favoritos = JSON.parse(
 
+localStorage.getItem("favoritos")
+
+) || [];
+
+
+
+favoritos.splice(index,1);
 
 
 
 localStorage.setItem(
 
-"usuario",
+"favoritos",
 
-JSON.stringify(usuario)
+JSON.stringify(favoritos)
 
 );
 
 
 
-alert("✅ Conta criada com sucesso!");
-
-
-
-window.location.href="login.html";
+carregarFavoritos();
 
 
 }
