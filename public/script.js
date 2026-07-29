@@ -4,131 +4,43 @@
 
 function criarConta(){
 
-
-let nome = document.getElementById("nome").value.trim();
-
-let email = document.getElementById("email").value.trim();
-
-let senha = document.getElementById("senha").value.trim();
+console.log("Botão criar conta funcionando");
 
 
+let nome = document.getElementById("nome").value;
+let email = document.getElementById("email").value;
+let senha = document.getElementById("senha").value;
 
-if(!nome || !email || !senha){
 
-alert("⚠️ Preencha todos os campos!");
+console.log(nome,email,senha);
+
+
+if(nome === "" || email === "" || senha === ""){
+
+alert("Preencha todos os campos!");
 
 return;
 
 }
 
 
-
-let usuario = {
+localStorage.setItem(
+"usuario",
+JSON.stringify({
 
 nome:nome,
-
 email:email,
-
 senha:senha
 
-};
-
-
-
-localStorage.setItem(
-
-"usuario",
-
-JSON.stringify(usuario)
-
+})
 );
 
 
 
-alert("✅ Conta criada com sucesso!");
-
+alert("Conta criada!");
 
 
 window.location.href="login.html";
-
-
-}
-
-
-
-
-
-// ==============================
-// LOGIN
-// ==============================
-
-
-function login(){
-
-
-let email = document.getElementById("email").value.trim();
-
-let senha = document.getElementById("senha").value.trim();
-
-
-
-let usuario = JSON.parse(
-
-localStorage.getItem("usuario")
-
-);
-
-
-
-if(
-
-usuario &&
-
-usuario.email === email &&
-
-usuario.senha === senha
-
-){
-
-
-
-localStorage.setItem(
-
-"logado",
-
-"true"
-
-);
-
-
-
-localStorage.setItem(
-
-"usuarioLogado",
-
-usuario.nome
-
-);
-
-
-
-alert("🔓 Login realizado!");
-
-
-
-window.location.href="index.html";
-
-
-
-}
-
-else{
-
-
-alert("❌ Email ou senha incorretos!");
-
-
-}
 
 
 }
