@@ -58,6 +58,166 @@ app.put("/recados/:id/curtir", async (req, res) => {
 
 });
 
+// =============================
+// CADASTRO DE USUÁRIO
+// =============================
+
+app.post("/cadastro", async (req,res)=>{
+
+    const {nome,email,senha} = req.body;
+
+
+    await pool.query(
+        `
+        INSERT INTO usuarios(nome,email,senha)
+        VALUES($1,$2,$3)
+        `,
+        [nome,email,senha]
+    );
+
+
+    res.json({
+        sucesso:true,
+        mensagem:"Usuário criado!"
+    });
+
+});
+
+
+
+// =============================
+// LOGIN
+// =============================
+
+app.post("/login", async(req,res)=>{
+
+    const {email,senha}=req.body;
+
+
+    const resultado = await pool.query(
+
+        "SELECT * FROM usuarios WHERE email=$1 AND senha=$2",
+
+        [email,senha]
+
+    );
+
+
+    if(resultado.rows.length > 0){
+
+
+        res.json({
+
+            sucesso:true,
+
+            usuario:resultado.rows[0],
+
+            token:"pokemon-token"
+
+        });
+
+
+    }else{
+
+
+        res.json({
+
+            sucesso:false
+
+        });
+
+
+    }
+
+
+});
+
+
+
+// =============================
+// SALVAR FAVORITO
+// =============================
+
+app.post("/favoritos", async(req,res)=>{
+
+
+const {
+usuario_id,
+nome,
+numero,
+imagem,
+tipo
+}=req.body;
+
+
+
+await pool.query(
+
+`
+INSERT INTO favoritos
+(usuario_id,nome,numero,imagem,tipo)
+
+VALUES($1,$2,$3,$4,$5)
+
+`,
+
+[
+usuario_id,
+nome,
+numero,
+imagem,
+tipo
+]
+
+
+);
+
+
+
+res.json({
+
+sucesso:true
+
+});
+
+
+});
+
+
+
+// =============================
+// LISTAR FAVORITOS
+// =============================
+
+app.get("/favoritos/:usuario", async(req,res)=>{
+
+
+const {usuario}=req.params;
+
+
+
+const resultado = await pool.query(
+
+`
+SELECT * FROM favoritos
+
+WHERE usuario_id=$1
+
+`,
+
+[usuario]
+
+
+);
+
+
+
+res.json(resultado.rows);
+
+
+
+});
+
 app.listen(PORT, () => {
 
     console.log("Servidor iniciado!");

@@ -1,89 +1,13 @@
-// Verifica login
-if(!localStorage.getItem("logado")){
+// ==============================
+// LOGIN LOCAL (SEM RAILWAY)
+// ==============================
 
-    window.location.href = "login.html";
 
-}
-
-async function carregarRecados(){
-
-const resposta=await fetch("/recados");
-
-const dados=await resposta.json();
-
-const mural=document.getElementById("recados");
-
-mural.innerHTML="";
-
-dados.forEach(recado=>{
-
-mural.innerHTML+=`
-
-<div class="recado">
-
-<h3>${recado.nome}</h3>
-
-<p>${recado.mensagem}</p>
-
-<div class="data">
-
-${new Date(recado.data).toLocaleString("pt-BR")}
-
-</div>
-
-</div>
-
-`;
-
-});
-
-}
-
-async function enviarRecado(){
-
-const nome=document.getElementById("nome").value;
-
-const mensagem=document.getElementById("mensagem").value;
-
-if(nome==""||mensagem==""){
-
-alert("Preencha todos os campos!");
-
-return;
-
-}
-
-await fetch("/recados",{
-
-method:"POST",
-
-headers:{
-
-"Content-Type":"application/json"
-
-},
-
-body:JSON.stringify({
-
-nome,
-
-mensagem
-
-})
-
-});
-
-document.getElementById("nome").value="";
-
-document.getElementById("mensagem").value="";
-
-carregarRecados();
-
-}
-
-carregarRecados();
+// CADASTRO
 
 function cadastro(){
+
+let nome = prompt("Digite seu nome:");
 
 let email = prompt("Digite seu email:");
 
@@ -91,16 +15,30 @@ let senha = prompt("Digite sua senha:");
 
 
 
+if(!nome || !email || !senha){
+
+alert("Preencha tudo!");
+
+return;
+
+}
+
+
+
 localStorage.setItem(
+
 "usuario",
+
 JSON.stringify({
 
-email: email,
-senha: senha
+nome,
+email,
+senha
 
 })
 
 );
+
 
 
 alert("Conta criada! Agora faça login.");
@@ -109,39 +47,64 @@ alert("Conta criada! Agora faça login.");
 
 
 
+
+// LOGIN
+
 function login(){
 
-let email =
+
+const email =
 document.getElementById("email").value;
 
 
-let senha =
+const senha =
 document.getElementById("senha").value;
 
 
 
-let usuario =
+const usuario =
+
 JSON.parse(
+
 localStorage.getItem("usuario")
+
 );
 
 
 
 if(
+
 usuario &&
+
 email === usuario.email &&
+
 senha === usuario.senha
+
 ){
 
 
 localStorage.setItem(
+
 "logado",
+
 "true"
+
+);
+
+
+
+localStorage.setItem(
+
+"usuarioLogado",
+
+JSON.stringify(usuario)
+
 );
 
 
 
 alert("Login realizado!");
+
 
 
 window.location.href="index.html";
@@ -156,6 +119,191 @@ alert("Email ou senha incorretos");
 
 
 }
+
+
+}
+
+
+
+
+
+// ==============================
+// PROTEGER POKÉDEX
+// ==============================
+
+
+function verificarLogin(){
+
+
+if(!localStorage.getItem("logado")){
+
+
+window.location.href="login.html";
+
+
+}
+
+
+}
+
+
+
+
+
+// ==============================
+// SAIR
+// ==============================
+
+
+function sair(){
+
+
+localStorage.removeItem("logado");
+
+
+localStorage.removeItem("usuarioLogado");
+
+
+window.location.href="login.html";
+
+
+}
+
+
+
+
+
+// ==============================
+// FAVORITOS
+// ==============================
+
+
+function favoritarPokemon(pokemon){
+
+
+
+let favoritos =
+
+
+JSON.parse(
+
+localStorage.getItem("favoritos")
+
+) || [];
+
+
+
+
+
+favoritos.push({
+
+
+nome:pokemon.name,
+
+
+numero:pokemon.id,
+
+
+imagem:
+
+pokemon.sprites.other["official-artwork"].front_default,
+
+
+tipo:
+
+pokemon.types[0].type.name
+
+
+});
+
+
+
+
+localStorage.setItem(
+
+"favoritos",
+
+JSON.stringify(favoritos)
+
+);
+
+
+
+
+alert("⭐ Pokémon salvo!");
+
+
+
+}
+
+
+
+
+
+// ==============================
+// CARREGAR FAVORITOS
+// ==============================
+
+
+function carregarFavoritos(){
+
+
+
+const lista =
+
+document.getElementById("listaFavoritos");
+
+
+
+if(!lista) return;
+
+
+
+let favoritos =
+
+
+JSON.parse(
+
+localStorage.getItem("favoritos")
+
+) || [];
+
+
+
+lista.innerHTML="";
+
+
+
+favoritos.forEach(p=>{
+
+
+
+lista.innerHTML += `
+
+
+<div class="pokemon-card">
+
+
+<h2>${p.nome}</h2>
+
+
+<img src="${p.imagem}" width="150">
+
+
+<p>Tipo: ${p.tipo}</p>
+
+
+<p>Número: #${p.numero}</p>
+
+
+</div>
+
+
+`;
+
+
+
+});
 
 
 }

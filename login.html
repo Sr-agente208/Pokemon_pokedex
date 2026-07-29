@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 
 <head>
 
 <meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Login - Pokédex</title>
 
@@ -17,35 +19,65 @@
 
 <div class="login-box">
 
+
+<img 
+src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+width="100"
+alt="Pokébola"
+>
+
+
 <h1>⚡ Pokédex</h1>
 
-<h2>Login</h2>
+
+<h2>🔐 Login</h2>
 
 
-<input id="email" placeholder="Email">
+
+<input 
+id="email"
+type="email"
+placeholder="Digite seu email"
+autocomplete="username"
+>
 
 
-<input id="senha" 
+
+<input 
+id="senha"
 type="password"
-placeholder="Senha">
+placeholder="Digite sua senha"
+autocomplete="current-password"
+>
+
 
 
 <button onclick="login()">
+
 🔓 Entrar
+
 </button>
+
 
 
 <p>
+
 Ainda não tem conta?
+
 </p>
 
 
+
 <button onclick="cadastro()">
+
 📝 Criar conta
+
 </button>
 
 
+
 </div>
+
 
 
 
