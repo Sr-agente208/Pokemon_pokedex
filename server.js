@@ -40,8 +40,66 @@ app.post("/recados", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
+app.put("/recados/:id/curtir", async (req, res) => {
+
+    const { id } = req.params;
+
+    await pool.query(
+
+        `UPDATE recados
+         SET curtidas = curtidas + 1
+         WHERE id = $1`,
+
+        [id]
+
+    );
+
+    res.json({ sucesso: true });
+
+});
+
 app.listen(PORT, () => {
 
     console.log("Servidor iniciado!");
+
+});
+
+app.delete("/recados/:id", async (req, res) => {
+
+    const { id } = req.params;
+
+    await pool.query(
+
+        "DELETE FROM recados WHERE id=$1",
+
+        [id]
+
+    );
+
+    res.json({ sucesso: true });
+
+});
+
+app.put("/recados/:id", async (req, res) => {
+
+    const { id } = req.params;
+
+    const { nome, mensagem } = req.body;
+
+    await pool.query(
+
+        `UPDATE recados
+
+         SET nome=$1,
+
+             mensagem=$2
+
+         WHERE id=$3`,
+
+        [nome, mensagem, id]
+
+    );
+
+    res.json({ sucesso: true });
 
 });
