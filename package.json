@@ -1,0 +1,15 @@
+{
+  "name": "mural-recados",
+  "version": "1.0.0",
+  "description": "Mural de recados Railway",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^4.21.2",
+    "pg": "^8.16.3"
+  }
+}

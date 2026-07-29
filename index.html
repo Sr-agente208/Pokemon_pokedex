@@ -1,51 +1,717 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pesquisa Pokémon</title>
-<meta name="description" content="Pesquisa Pokémon">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Poké Pesquisa</title>
+
+<meta name="description" content="Pesquise qualquer Pokémon">
+
 <meta name="theme-color" content="#ef5350">
-<link rel="icon" href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png">
+
+<link rel="icon"
+href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png">
+
 <style>
-body{margin:0;font-family:Arial;background:#111;color:#fff;background-size:contain;background-repeat:no-repeat;background-position:center}
-body:before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.45)}
-main{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:40px}
-form{display:flex;width:min(700px,90vw)}
-input{flex:1;padding:15px;border-radius:30px 0 0 30px;border:0}
-button{padding:15px 20px;border:0;border-radius:0 30px 30px 0;cursor:pointer}
-#card{display:none;margin-top:25px;background:rgba(255,255,255,.12);padding:20px;border-radius:15px;max-width:500px;width:90%;backdrop-filter:blur(6px)}
-img{width:220px;display:block;margin:auto}
+
+*{
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+
+}
+
+body{
+
+background:#111;
+color:white;
+
+height:100vh;
+
+background-size:contain;
+background-repeat:no-repeat;
+background-position:center;
+
+transition:background-image 1s ease;
+
+overflow-x:hidden;
+
+}
+
+body::before{
+
+content:"";
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+background:rgba(0,0,0,.45);
+
+backdrop-filter:blur(4px);
+
+z-index:-1;
+
+}
+
+main{
+
+width:100%;
+
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
+
+padding:40px 20px;
+
+}
+
+h1{
+
+font-size:40px;
+
+margin-bottom:25px;
+
+text-shadow:0 0 15px black;
+
+}
+
+form{
+
+display:flex;
+
+width:min(700px,90vw);
+
+margin-bottom:25px;
+
+}
+
+input{
+
+flex:1;
+
+padding:18px;
+
+font-size:18px;
+
+border:none;
+
+outline:none;
+
+border-radius:40px 0 0 40px;
+
+}
+
+button{
+
+padding:18px 28px;
+
+border:none;
+
+background:#ef5350;
+
+color:white;
+
+cursor:pointer;
+
+font-size:18px;
+
+border-radius:0 40px 40px 0;
+
+transition:.25s;
+
+}
+
+button:hover{
+
+background:#d32f2f;
+
+}
+
+#card{
+
+display:none;
+
+width:min(850px,95vw);
+
+background:rgba(255,255,255,.15);
+
+backdrop-filter:blur(10px);
+
+padding:30px;
+
+border-radius:20px;
+
+box-shadow:0 0 25px rgba(0,0,0,.45);
+
+animation:fade .5s;
+
+}
+
+@keyframes fade{
+
+from{
+
+opacity:0;
+
+transform:translateY(15px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateY(0);
+
+}
+
+}
+
+.topo{
+
+display:flex;
+
+flex-wrap:wrap;
+
+justify-content:center;
+
+align-items:center;
+
+gap:25px;
+
+}
+
+#pokemonImg{
+
+width:260px;
+
+max-width:90%;
+
+filter:drop-shadow(0 0 20px black);
+
+}
+
+.info{
+
+flex:1;
+
+min-width:250px;
+
+}
+
+.info h2{
+
+font-size:34px;
+
+margin-bottom:10px;
+
+}
+
+.info p{
+
+margin:10px 0;
+
+font-size:18px;
+
+}
+.status{
+
+margin-top:20px;
+
+}
+
+.barra{
+
+margin:12px 0;
+
+}
+
+.barra span{
+
+display:block;
+
+margin-bottom:4px;
+
+font-size:15px;
+
+}
+
+.fundoBarra{
+
+width:100%;
+
+height:18px;
+
+background:rgba(255,255,255,.2);
+
+border-radius:20px;
+
+overflow:hidden;
+
+}
+
+.progresso{
+
+height:100%;
+
+width:0%;
+
+background:linear-gradient(90deg,#42a5f5,#66bb6a);
+
+transition:width .8s;
+
+}
+
+#tipos{
+
+display:flex;
+
+gap:10px;
+
+flex-wrap:wrap;
+
+margin:15px 0;
+
+}
+
+.tipo{
+
+padding:8px 15px;
+
+border-radius:30px;
+
+font-weight:bold;
+
+text-transform:capitalize;
+
+color:white;
+
+}
+
+#acoes{
+
+margin-top:20px;
+
+display:flex;
+
+gap:12px;
+
+flex-wrap:wrap;
+
+}
+
+.botao{
+
+padding:12px 20px;
+
+border:none;
+
+border-radius:10px;
+
+cursor:pointer;
+
+background:#1976d2;
+
+color:white;
+
+font-size:15px;
+
+transition:.25s;
+
+}
+
+.botao:hover{
+
+transform:scale(1.05);
+
+}
+
+#erro{
+
+display:none;
+
+margin-top:20px;
+
+color:#ffb3b3;
+
+font-weight:bold;
+
+}
+
+footer{
+
+margin-top:40px;
+
+opacity:.7;
+
+font-size:14px;
+
+}
+
 </style>
-</head><body><main>
-<form id="f"><input id="q" placeholder="Pesquisar Pokémon..."><button>Pesquisar</button></form>
-<div id="card"><h2 id="n"></h2><img id="i"><p id="t"></p><p id="h"></p><p id="w"></p><p id="a"></p></div>
-</main>
+
+</head>
+
+<body>
+
+<main>
+
+<h1>🔍 Poké Pesquisa</h1>
+
+<form id="formPesquisa">
+
+<input
+
+id="pesquisa"
+
+type="text"
+
+placeholder="Digite o nome ou número do Pokémon..."
+
+autocomplete="off">
+
+<button>
+
+Pesquisar
+
+</button>
+
+</form>
+
+<div id="erro"></div>
+
+<div id="card">
+
+<div class="topo">
+
+<img
+
+id="pokemonImg"
+
+src="">
+
+<div class="info">
+
+<h2 id="nomePokemon"></h2>
+
+<p id="numeroPokemon"></p>
+
+<div id="tipos"></div>
+
+<p id="altura"></p>
+
+<p id="peso"></p>
+
+<p id="habilidades"></p>
+
+<div id="acoes">
+
+<button
+
+class="botao"
+
+id="som">
+
+🔊 Ouvir Cry
+
+</button>
+
+<button
+
+class="botao"
+
+id="novoPokemon">
+
+🎲 Aleatório
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="status">
+
+<div class="barra">
+
+<span>HP</span>
+
+<div class="fundoBarra">
+
+<div id="hp"
+
+class="progresso"></div>
+
+</div>
+
+</div>
+
+<div class="barra">
+
+<span>Ataque</span>
+
+<div class="fundoBarra">
+
+<div id="atk"
+
+class="progresso"></div>
+
+</div>
+
+</div>
+
+<div class="barra">
+
+<span>Defesa</span>
+
+<div class="fundoBarra">
+
+<div id="def"
+
+class="progresso"></div>
+
+</div>
+
+</div>
+
+<div class="barra">
+
+<span>Velocidade</span>
+
+<div class="fundoBarra">
+
+<div id="spd"
+
+class="progresso"></div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<footer>
+
+Dados fornecidos pela PokéAPI
+
+</footer>
+
 <script>
-async function bg(){
-const id=Math.floor(Math.random()*1025)+1;
+
+const TOTAL = 1025;
+
+let cry = "";
+const tiposCor={
+
+normal:"#A8A77A",
+fire:"#EE8130",
+water:"#6390F0",
+electric:"#F7D02C",
+grass:"#7AC74C",
+ice:"#96D9D6",
+fighting:"#C22E28",
+poison:"#A33EA1",
+ground:"#E2BF65",
+flying:"#A98FF3",
+psychic:"#F95587",
+bug:"#A6B91A",
+rock:"#B6A136",
+ghost:"#735797",
+dragon:"#6F35FC",
+dark:"#705746",
+steel:"#B7B7CE",
+fairy:"#D685AD"
+
+};
+
+async function trocarWallpaper(){
+
+const numero=Math.floor(Math.random()*TOTAL)+1;
+
 try{
-const r=await fetch("https://pokeapi.co/api/v2/pokemon/"+id);
-const d=await r.json();
-document.body.style.backgroundImage=`url(${d.sprites.other["official-artwork"].front_default})`;
+
+const resposta=await fetch(
+`https://pokeapi.co/api/v2/pokemon/${numero}`);
+
+const pokemon=await resposta.json();
+
+document.body.style.backgroundImage=
+`url(${pokemon.sprites.other["official-artwork"].front_default})`;
+
 }catch(e){}
+
 }
-bg();setInterval(bg,600000);
-document.getElementById("f").onsubmit=async(e)=>{
-e.preventDefault();
-const v=q.value.trim().toLowerCase();
-if(!v)return;
+
+trocarWallpaper();
+
+setInterval(trocarWallpaper,600000);
+
+async function pesquisar(valor){
+
+erro.style.display="none";
+
 try{
-const r=await fetch("https://pokeapi.co/api/v2/pokemon/"+encodeURIComponent(v));
-if(!r.ok)throw Error();
-const d=await r.json();
-card.style.display="block";
-n.textContent=`${d.name} (#${d.id})`;
-i.src=d.sprites.other["official-artwork"].front_default;
-t.textContent="Tipos: "+d.types.map(x=>x.type.name).join(", ");
-h.textContent="Altura: "+(d.height/10)+" m";
-w.textContent="Peso: "+(d.weight/10)+" kg";
-a.textContent="Habilidades: "+d.abilities.map(x=>x.ability.name).join(", ");
-}catch{alert("Pokémon não encontrado.");}
+
+const resposta=await fetch(
+`https://pokeapi.co/api/v2/pokemon/${valor.toLowerCase()}`
+);
+
+if(!resposta.ok)
+throw Error();
+
+const pokemon=await resposta.json();
+
+mostrarPokemon(pokemon);
+
+}catch{
+
+card.style.display="none";
+
+erro.innerHTML="❌ Pokémon não encontrado.";
+
+erro.style.display="block";
+
 }
-</script></body></html>
+
+}
+
+function mostrarPokemon(p){
+
+card.style.display="block";
+
+nomePokemon.innerHTML=
+p.name.charAt(0).toUpperCase()+p.name.slice(1);
+
+numeroPokemon.innerHTML=
+"#"+p.id;
+
+pokemonImg.src=
+p.sprites.other["official-artwork"].front_default;
+
+altura.innerHTML=
+"📏 Altura: "+(p.height/10)+" m";
+
+peso.innerHTML=
+"⚖ Peso: "+(p.weight/10)+" kg";
+
+habilidades.innerHTML=
+"⭐ Habilidades: "+
+p.abilities.map(h=>h.ability.name).join(", ");
+
+tipos.innerHTML="";
+
+p.types.forEach(t=>{
+
+tipos.innerHTML+=`
+
+<div class="tipo"
+
+style="background:${tiposCor[t.type.name]||"#666"}">
+
+${t.type.name}
+
+</div>
+
+`;
+
+});
+
+hp.style.width=
+Math.min(p.stats[0].base_stat,100)+"%";
+
+atk.style.width=
+Math.min(p.stats[1].base_stat,100)+"%";
+
+def.style.width=
+Math.min(p.stats[2].base_stat,100)+"%";
+
+spd.style.width=
+Math.min(p.stats[5].base_stat,100)+"%";
+
+cry=
+p.cries?.latest||
+p.cries?.legacy||
+"";
+
+}
+// Pesquisa ao enviar o formulário
+formPesquisa.addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+    const valor = pesquisa.value.trim();
+
+    if(valor !== ""){
+
+        pesquisar(valor);
+
+    }
+
+});
+
+// Botão Pokémon aleatório
+novoPokemon.addEventListener("click", function(){
+
+    const numero = Math.floor(Math.random()*TOTAL)+1;
+
+    pesquisar(numero);
+
+});
+
+// Ouvir o cry do Pokémon
+som.addEventListener("click", function(){
+
+    if(cry){
+
+        const audio = new Audio(cry);
+
+        audio.volume = 0.7;
+
+        audio.play();
+
+    }else{
+
+        alert("Este Pokémon não possui cry disponível.");
+
+    }
+
+});
+
+// Enter também pesquisa
+pesquisa.addEventListener("keydown", function(e){
+
+    if(e.key === "Enter"){
+
+        e.preventDefault();
+
+        formPesquisa.requestSubmit();
+
+    }
+
+});
+
+// Carrega um Pokémon aleatório ao abrir
+pesquisar(Math.floor(Math.random()*TOTAL)+1);
+
+</script>
+
+</body>
+
+</html>
