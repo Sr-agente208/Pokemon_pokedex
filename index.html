@@ -16,26 +16,29 @@
 <link rel="icon"
 href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png">
 
+
 <style>
 
 *{
-
 margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:Arial,Helvetica,sans-serif;
-
 }
+
 
 body{
 
 background:#111;
+
 color:white;
 
 height:100vh;
 
 background-size:contain;
+
 background-repeat:no-repeat;
+
 background-position:center;
 
 transition:background-image 1s ease;
@@ -43,6 +46,7 @@ transition:background-image 1s ease;
 overflow-x:hidden;
 
 }
+
 
 body::before{
 
@@ -64,6 +68,8 @@ z-index:-1;
 
 }
 
+
+
 main{
 
 width:100%;
@@ -78,6 +84,8 @@ padding:40px 20px;
 
 }
 
+
+
 h1{
 
 font-size:40px;
@@ -88,6 +96,51 @@ text-shadow:0 0 15px black;
 
 }
 
+
+
+#usuarioArea{
+
+position:absolute;
+
+top:20px;
+
+right:20px;
+
+}
+
+
+
+button{
+
+padding:12px 20px;
+
+border:none;
+
+background:#ef5350;
+
+color:white;
+
+cursor:pointer;
+
+border-radius:20px;
+
+font-size:16px;
+
+transition:.3s;
+
+}
+
+
+button:hover{
+
+transform:scale(1.05);
+
+background:#d32f2f;
+
+}
+
+
+
 form{
 
 display:flex;
@@ -97,6 +150,8 @@ width:min(700px,90vw);
 margin-bottom:25px;
 
 }
+
+
 
 input{
 
@@ -114,31 +169,15 @@ border-radius:40px 0 0 40px;
 
 }
 
-button{
 
-padding:18px 28px;
 
-border:none;
-
-background:#ef5350;
-
-color:white;
-
-cursor:pointer;
-
-font-size:18px;
+form button{
 
 border-radius:0 40px 40px 0;
 
-transition:.25s;
-
 }
 
-button:hover{
 
-background:#d32f2f;
-
-}
 
 #card{
 
@@ -156,29 +195,9 @@ border-radius:20px;
 
 box-shadow:0 0 25px rgba(0,0,0,.45);
 
-animation:fade .5s;
-
 }
 
-@keyframes fade{
 
-from{
-
-opacity:0;
-
-transform:translateY(15px);
-
-}
-
-to{
-
-opacity:1;
-
-transform:translateY(0);
-
-}
-
-}
 
 .topo{
 
@@ -194,15 +213,17 @@ gap:25px;
 
 }
 
+
+
 #pokemonImg{
 
 width:260px;
 
-max-width:90%;
-
 filter:drop-shadow(0 0 20px black);
 
 }
+
+
 
 .info{
 
@@ -212,13 +233,15 @@ min-width:250px;
 
 }
 
+
+
 .info h2{
 
 font-size:34px;
 
-margin-bottom:10px;
-
 }
+
+
 
 .info p{
 
@@ -227,53 +250,8 @@ margin:10px 0;
 font-size:18px;
 
 }
-.status{
 
-margin-top:20px;
 
-}
-
-.barra{
-
-margin:12px 0;
-
-}
-
-.barra span{
-
-display:block;
-
-margin-bottom:4px;
-
-font-size:15px;
-
-}
-
-.fundoBarra{
-
-width:100%;
-
-height:18px;
-
-background:rgba(255,255,255,.2);
-
-border-radius:20px;
-
-overflow:hidden;
-
-}
-
-.progresso{
-
-height:100%;
-
-width:0%;
-
-background:linear-gradient(90deg,#42a5f5,#66bb6a);
-
-transition:width .8s;
-
-}
 
 #tipos{
 
@@ -287,6 +265,8 @@ margin:15px 0;
 
 }
 
+
+
 .tipo{
 
 padding:8px 15px;
@@ -297,9 +277,9 @@ font-weight:bold;
 
 text-transform:capitalize;
 
-color:white;
-
 }
+
+
 
 #acoes{
 
@@ -313,75 +293,47 @@ flex-wrap:wrap;
 
 }
 
+
 .botao{
-
-padding:12px 20px;
-
-border:none;
-
-border-radius:10px;
-
-cursor:pointer;
 
 background:#1976d2;
 
-color:white;
-
-font-size:15px;
-
-transition:.25s;
-
 }
 
-.botao:hover{
 
-transform:scale(1.05);
-
-}
-
-#erro{
-
-display:none;
-
-margin-top:20px;
-
-color:#ffb3b3;
-
-font-weight:bold;
-
-}
-
-footer{
-
-margin-top:40px;
-
-opacity:.7;
-
-font-size:14px;
-
-}
 
 </style>
 
 </head>
 
+
 <body>
+
+
+<div id="usuarioArea">
+
+<button onclick="sair()">
+🚪 Sair
+</button>
+
+</div>
+
 
 <main>
 
+
 <h1>🔍 Poké Pesquisa</h1>
 
+
 <form id="formPesquisa">
+
 
 <input
 
 id="pesquisa"
 
-type="text"
+placeholder="Digite o nome ou número do Pokémon...">
 
-placeholder="Digite o nome ou número do Pokémon..."
-
-autocomplete="off">
 
 <button>
 
@@ -389,136 +341,79 @@ Pesquisar
 
 </button>
 
+
 </form>
+
 
 <div id="erro"></div>
 
+
+
 <div id="card">
+
 
 <div class="topo">
 
-<img
 
-id="pokemonImg"
+<img id="pokemonImg">
 
-src="">
 
 <div class="info">
 
+
 <h2 id="nomePokemon"></h2>
+
 
 <p id="numeroPokemon"></p>
 
+
 <div id="tipos"></div>
+
 
 <p id="altura"></p>
 
+
 <p id="peso"></p>
+
 
 <p id="habilidades"></p>
 
+
 <div id="acoes">
 
-<button
 
-class="botao"
-
-id="som">
+<button class="botao" id="som">
 
 🔊 Ouvir Cry
 
 </button>
 
-<button
 
-class="botao"
-
-id="novoPokemon">
+<button class="botao" id="novoPokemon">
 
 🎲 Aleatório
 
 </button>
 
-</div>
 
 </div>
 
-</div>
-
-<div class="status">
-
-<div class="barra">
-
-<span>HP</span>
-
-<div class="fundoBarra">
-
-<div id="hp"
-
-class="progresso"></div>
 
 </div>
 
-</div>
-
-<div class="barra">
-
-<span>Ataque</span>
-
-<div class="fundoBarra">
-
-<div id="atk"
-
-class="progresso"></div>
 
 </div>
-
-</div>
-
-<div class="barra">
-
-<span>Defesa</span>
-
-<div class="fundoBarra">
-
-<div id="def"
-
-class="progresso"></div>
-
-</div>
-
-</div>
-
-<div class="barra">
-
-<span>Velocidade</span>
-
-<div class="fundoBarra">
-
-<div id="spd"
-
-class="progresso"></div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<footer>
-
-Dados fornecidos pela PokéAPI
-
-</footer>
 
 <script>
 
 const TOTAL = 1025;
 
 let cry = "";
-const tiposCor={
+
+let pokemonAtual = null;
+
+
+const tiposCor = {
 
 normal:"#A8A77A",
 fire:"#EE8130",
@@ -541,191 +436,463 @@ fairy:"#D685AD"
 
 };
 
+
+// =================
+// LOGIN
+// =================
+
+
+if(!localStorage.getItem("logado")){
+
+window.location.href="login.html";
+
+}
+
+
+function sair(){
+
+localStorage.removeItem("logado");
+
+window.location.href="login.html";
+
+}
+
+
+
+// =================
+// WALLPAPER
+// =================
+
+
 async function trocarWallpaper(){
 
 const numero=Math.floor(Math.random()*TOTAL)+1;
 
+
 try{
 
+
 const resposta=await fetch(
-`https://pokeapi.co/api/v2/pokemon/${numero}`);
+
+`https://pokeapi.co/api/v2/pokemon/${numero}`
+
+);
+
 
 const pokemon=await resposta.json();
 
+
 document.body.style.backgroundImage=
+
 `url(${pokemon.sprites.other["official-artwork"].front_default})`;
+
 
 }catch(e){}
 
+
 }
+
 
 trocarWallpaper();
 
+
 setInterval(trocarWallpaper,600000);
+
+
+
+// =================
+// PESQUISA
+// =================
+
 
 async function pesquisar(valor){
 
+
 erro.style.display="none";
+
 
 try{
 
+
 const resposta=await fetch(
+
 `https://pokeapi.co/api/v2/pokemon/${valor.toLowerCase()}`
+
 );
 
+
+
 if(!resposta.ok)
+
 throw Error();
+
+
 
 const pokemon=await resposta.json();
 
+
 mostrarPokemon(pokemon);
+
+
 
 }catch{
 
+
 card.style.display="none";
 
-erro.innerHTML="❌ Pokémon não encontrado.";
+
+erro.innerHTML="❌ Pokémon não encontrado";
+
 
 erro.style.display="block";
 
-}
 
 }
+
+
+}
+
+
+
+
+// =================
+// MOSTRAR POKEMON
+// =================
+
 
 function mostrarPokemon(p){
 
+
+pokemonAtual = p;
+
+
 card.style.display="block";
 
+
+
 nomePokemon.innerHTML=
+
 p.name.charAt(0).toUpperCase()+p.name.slice(1);
 
+
+
 numeroPokemon.innerHTML=
+
 "#"+p.id;
 
+
+
 pokemonImg.src=
+
 p.sprites.other["official-artwork"].front_default;
 
+
+
 altura.innerHTML=
+
 "📏 Altura: "+(p.height/10)+" m";
 
+
+
 peso.innerHTML=
+
 "⚖ Peso: "+(p.weight/10)+" kg";
 
+
+
 habilidades.innerHTML=
+
 "⭐ Habilidades: "+
+
 p.abilities.map(h=>h.ability.name).join(", ");
+
+
+
+
 
 tipos.innerHTML="";
 
+
+
 p.types.forEach(t=>{
 
-tipos.innerHTML+=`
+
+tipos.innerHTML += `
+
 
 <div class="tipo"
 
-style="background:${tiposCor[t.type.name]||"#666"}">
+style="background:${tiposCor[t.type.name] || "#666"}">
 
 ${t.type.name}
 
-<button id="baixarPDF">
-📄 Baixar ficha PDF
-</button>
-
-<button id="baixarWord">
-📝 Baixar ficha Word
-</button>
-
 </div>
+
 
 `;
 
+
 });
+
+
+
+// STATUS
 
 hp.style.width=
+
 Math.min(p.stats[0].base_stat,100)+"%";
 
+
+
 atk.style.width=
+
 Math.min(p.stats[1].base_stat,100)+"%";
 
+
+
 def.style.width=
+
 Math.min(p.stats[2].base_stat,100)+"%";
 
+
+
 spd.style.width=
+
 Math.min(p.stats[5].base_stat,100)+"%";
 
+
+
 cry=
-p.cries?.latest||
-p.cries?.legacy||
-"";
+
+p.cries?.latest || "";
+
+
+
+// BOTÕES
+
+acoes.innerHTML += `
+
+
+<button class="botao" onclick="favoritarPokemon()">
+
+⭐ Favoritar
+
+</button>
+
+
+<button class="botao" onclick="baixarPDF()">
+
+📄 PDF
+
+</button>
+
+
+<button class="botao" onclick="baixarWord()">
+
+📝 Word
+
+</button>
+
+
+`;
+
+
 
 }
-// Pesquisa ao enviar o formulário
-formPesquisa.addEventListener("submit", function(e){
 
-    e.preventDefault();
 
-    const valor = pesquisa.value.trim();
 
-    if(valor !== ""){
+// =================
+// FAVORITOS
+// =================
 
-        pesquisar(valor);
 
-    }
+function favoritarPokemon(){
 
-});
 
-// Botão Pokémon aleatório
-novoPokemon.addEventListener("click", function(){
+let favoritos =
 
-    const numero = Math.floor(Math.random()*TOTAL)+1;
+JSON.parse(localStorage.getItem("favoritos")) || [];
 
-    pesquisar(numero);
 
-});
 
-// Ouvir o cry do Pokémon
-som.addEventListener("click", function(){
+favoritos.push({
 
-    if(cry){
 
-        const audio = new Audio(cry);
+nome:pokemonAtual.name,
 
-        audio.volume = 0.7;
 
-        audio.play();
+imagem:
 
-    }else{
+pokemonAtual.sprites.other["official-artwork"].front_default,
 
-        alert("Este Pokémon não possui cry disponível.");
 
-    }
+tipo:
+
+pokemonAtual.types[0].type.name
+
 
 });
 
-// Enter também pesquisa
-pesquisa.addEventListener("keydown", function(e){
 
-    if(e.key === "Enter"){
 
-        e.preventDefault();
+localStorage.setItem(
 
-        formPesquisa.requestSubmit();
+"favoritos",
 
-    }
+JSON.stringify(favoritos)
 
-});
+);
 
-// Carrega um Pokémon aleatório ao abrir
-pesquisar(Math.floor(Math.random()*TOTAL)+1);
 
-<script src="script.js"></script>
-<script>
-    
-if(!localStorage.getItem("logado")){
-    window.location.href="login.html";
+
+alert("⭐ Pokémon salvo nos favoritos!");
+
+
+
 }
+
+
+
+// =================
+// PESQUISA FORM
+// =================
+
+
+formPesquisa.addEventListener(
+
+"submit",
+
+function(e){
+
+
+e.preventDefault();
+
+
+let valor=pesquisa.value.trim();
+
+
+
+if(valor)
+
+pesquisar(valor);
+
+
+
+}
+
+);
+
+
+
+
+// =================
+// ALEATÓRIO
+// =================
+
+
+novoPokemon.addEventListener(
+
+"click",
+
+function(){
+
+
+let numero=
+
+Math.floor(Math.random()*TOTAL)+1;
+
+
+pesquisar(numero);
+
+
+}
+
+);
+
+
+
+// =================
+// CRY
+// =================
+
+
+som.addEventListener(
+
+"click",
+
+function(){
+
+
+if(cry){
+
+
+let audio=new Audio(cry);
+
+
+audio.play();
+
+
+}
+
+}
+
+);
+
+
+
+// =================
+// PDF
+// =================
+
+
+async function baixarPDF(){
+
+
+alert(
+
+"PDF será conectado na próxima etapa"
+
+);
+
+
+}
+
+
+
+// =================
+// WORD
+// =================
+
+
+async function baixarWord(){
+
+
+alert(
+
+"Word será conectado na próxima etapa"
+
+);
+
+
+}
+
+
+
+// =================
+// INICIAR
+// =================
+
+
+pesquisar(
+
+Math.floor(Math.random()*TOTAL)+1
+
+);
+
 
 </script>
+
 
 </body>
 
