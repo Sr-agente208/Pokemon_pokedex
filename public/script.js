@@ -297,3 +297,72 @@ carregarFavoritos();
 
 
 }
+);
+
+
+}
+
+
+
+
+
+// ======================
+// WORD
+// ======================
+
+
+function baixarWord(){
+
+
+if(!pokemonAtual)return;
+
+
+
+let p=pokemonAtual;
+
+
+
+let texto=`
+
+POKÉDEX
+
+Nome: ${p.name}
+
+Número: ${p.id}
+
+Tipo: ${p.types[0].type.name}
+
+Altura: ${p.height/10}m
+
+Peso: ${p.weight/10}kg
+
+`;
+
+
+
+let arquivo=new Blob(
+
+[texto],
+
+{type:"application/msword"}
+
+);
+
+
+
+let link=document.createElement("a");
+
+
+link.href=URL.createObjectURL(arquivo);
+
+
+link.download=p.name+".doc";
+
+
+link.click();
+
+
+}
+
+
+
