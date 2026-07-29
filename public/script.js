@@ -53,16 +53,16 @@ alert("Conta criada! Agora faça login.");
 function login(){
 
 
-const email =
+let email =
 document.getElementById("email").value;
 
 
-const senha =
+let senha =
 document.getElementById("senha").value;
 
 
 
-const usuario =
+let usuario =
 
 JSON.parse(
 
@@ -76,9 +76,9 @@ if(
 
 usuario &&
 
-email === usuario.email &&
+usuario.email === email &&
 
-senha === usuario.senha
+usuario.senha === senha
 
 ){
 
@@ -93,18 +93,7 @@ localStorage.setItem(
 
 
 
-localStorage.setItem(
-
-"usuarioLogado",
-
-JSON.stringify(usuario)
-
-);
-
-
-
 alert("Login realizado!");
-
 
 
 window.location.href="index.html";
@@ -115,14 +104,12 @@ window.location.href="index.html";
 else{
 
 
-alert("Email ou senha incorretos");
-
-
-}
-
+alert("Usuário ou senha incorretos!");
 
 }
 
+
+}
 
 
 
@@ -304,6 +291,56 @@ lista.innerHTML += `
 
 
 });
+
+
+}
+
+function criarConta(){
+
+
+let nome =
+document.getElementById("nome").value;
+
+
+let email =
+document.getElementById("email").value;
+
+
+let senha =
+document.getElementById("senha").value;
+
+
+
+if(!nome || !email || !senha){
+
+alert("Preencha todos os campos!");
+
+return;
+
+}
+
+
+
+localStorage.setItem(
+
+"usuario",
+
+JSON.stringify({
+
+nome,
+email,
+senha
+
+})
+
+);
+
+
+
+alert("Conta criada com sucesso!");
+
+
+window.location.href="login.html";
 
 
 }
