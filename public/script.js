@@ -1,3 +1,10 @@
+// Verifica login
+if(!localStorage.getItem("logado")){
+
+    window.location.href = "login.html";
+
+}
+
 async function carregarRecados(){
 
 const resposta=await fetch("/recados");

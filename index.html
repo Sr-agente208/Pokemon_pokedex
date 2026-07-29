@@ -718,6 +718,13 @@ pesquisa.addEventListener("keydown", function(e){
 // Carrega um Pokémon aleatório ao abrir
 pesquisar(Math.floor(Math.random()*TOTAL)+1);
 
+<script src="script.js"></script>
+<script>
+    
+if(!localStorage.getItem("logado")){
+    window.location.href="login.html";
+}
+
 </script>
 
 </body>
