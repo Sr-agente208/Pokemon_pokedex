@@ -364,5 +364,42 @@ link.click();
 
 }
 
+// ==============================
+// LOGIN
+// ==============================
 
+function login() {
+
+    let email = document.getElementById("email").value.trim();
+    let senha = document.getElementById("senha").value.trim();
+
+    if (email === "" || senha === "") {
+        alert("Preencha todos os campos!");
+        return;
+    }
+
+    let usuario = JSON.parse(localStorage.getItem("usuario"));
+
+    if (!usuario) {
+        alert("Nenhuma conta encontrada. Crie uma conta primeiro.");
+        window.location.href = "cadastro.html";
+        return;
+    }
+
+    if (email === usuario.email && senha === usuario.senha) {
+
+        localStorage.setItem("logado", "true");
+        localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
+
+        alert("✅ Login realizado com sucesso!");
+
+        window.location.href = "index.html";
+
+    } else {
+
+        alert("❌ Email ou senha incorretos!");
+
+    }
+
+}
 
