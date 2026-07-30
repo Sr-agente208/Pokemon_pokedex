@@ -263,3 +263,53 @@ app.put("/recados/:id", async (req, res) => {
     res.json({ sucesso: true });
 
 });
+
+// =============================
+// DELETE RECADOS
+// =============================
+
+app.delete("/recados/:id", async (req, res) => {
+
+    const { id } = req.params;
+
+    await pool.query(
+        "DELETE FROM recados WHERE id=$1",
+        [id]
+    );
+
+    res.json({ sucesso: true });
+
+});
+
+
+// =============================
+// EDITAR RECADOS
+// =============================
+
+app.put("/recados/:id", async (req, res) => {
+
+    const { id } = req.params;
+    const { nome, mensagem } = req.body;
+
+    await pool.query(
+        `
+        UPDATE recados
+        SET nome=$1,
+            mensagem=$2
+        WHERE id=$3
+        `,
+        [nome, mensagem, id]
+    );
+
+    res.json({ sucesso: true });
+
+});
+
+
+// =============================
+// INICIAR SERVIDOR
+// =============================
+
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
