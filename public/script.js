@@ -2,6 +2,7 @@
 // SISTEMA DE USUÁRIOS
 // ======================================
 
+console.log("SCRIPT DA POKEDEX CARREGADO");
 
 // CRIAR CONTA
 function criarConta(){
