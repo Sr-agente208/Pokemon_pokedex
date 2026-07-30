@@ -10,23 +10,54 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// arquivos públicos
-app.use(express.static(__dirname));
+
+// arquivos do site
 app.use(express.static(path.join(__dirname, "public")));
 
 
-// =======================
-// INDEX
-// =======================
-
+// página inicial
 app.get("/", (req,res)=>{
-    res.sendFile(path.join(__dirname,"index.html"));
+    res.sendFile(
+        path.join(__dirname,"public","index.html")
+    );
 });
 
 
-// =======================
+// =====================
+// TESTE BANCO
+// =====================
+
+app.get("/teste-banco", async(req,res)=>{
+
+    try{
+
+        const result = await pool.query(
+            "SELECT NOW()"
+        );
+
+        res.json({
+            conectado:true,
+            banco:result.rows
+        });
+
+    }catch(err){
+
+        console.log(err);
+
+        res.status(500).json({
+            erro:"Erro no banco",
+            detalhe:err.message
+        });
+
+    }
+
+});
+
+
+
+// =====================
 // RECADOS
-// =======================
+// =====================
 
 app.get("/recados", async(req,res)=>{
 
@@ -38,11 +69,14 @@ app.get("/recados", async(req,res)=>{
 
         res.json(result.rows);
 
+
     }catch(err){
 
         console.log(err);
+
         res.status(500).json({
-            erro:"Erro no banco"
+            erro:"Erro no banco",
+            detalhe:err.message
         });
 
     }
@@ -59,11 +93,14 @@ app.post("/recados", async(req,res)=>{
 
 
         await pool.query(
+
             `
             INSERT INTO recados(nome,mensagem)
             VALUES($1,$2)
             `,
+
             [nome,mensagem]
+
         );
 
 
@@ -77,18 +114,22 @@ app.post("/recados", async(req,res)=>{
         console.log(err);
 
         res.status(500).json({
-            erro:"Erro ao salvar"
+            erro:"Erro no banco",
+            detalhe:err.message
         });
 
     }
+
 
 });
 
 
 
-// =======================
+
+// =====================
 // CADASTRO
-// =======================
+// =====================
+
 
 app.post("/cadastro", async(req,res)=>{
 
@@ -99,16 +140,22 @@ const {nome,email,senha}=req.body;
 
 
 await pool.query(
+
 `
 INSERT INTO usuarios(nome,email,senha)
 VALUES($1,$2,$3)
 `,
+
 [nome,email,senha]
+
 );
 
 
+
 res.json({
+
 sucesso:true
+
 });
 
 
@@ -117,21 +164,25 @@ sucesso:true
 console.log(err);
 
 res.status(500).json({
-erro:"Cadastro falhou"
-});
 
+erro:"Erro no cadastro",
+detalhe:err.message
+
+});
 
 }
 
 
+
 });
 
 
 
 
-// =======================
+// =====================
 // LOGIN
-// =======================
+// =====================
+
 
 app.post("/login",async(req,res)=>{
 
@@ -146,9 +197,9 @@ const result = await pool.query(
 
 `
 SELECT * FROM usuarios
-WHERE email=$1
-AND senha=$2
+WHERE email=$1 AND senha=$2
 `,
+
 [email,senha]
 
 );
@@ -160,7 +211,6 @@ if(result.rows.length){
 res.json({
 
 sucesso:true,
-
 usuario:result.rows[0]
 
 });
@@ -179,13 +229,20 @@ sucesso:false
 }
 
 
+
 }catch(err){
+
 
 console.log(err);
 
+
 res.status(500).json({
-erro:"Erro login"
+
+erro:"Erro login",
+detalhe:err.message
+
 });
+
 
 }
 
@@ -194,14 +251,17 @@ erro:"Erro login"
 
 
 
-// =======================
+
+// =====================
 // FAVORITOS
-// =======================
+// =====================
+
 
 app.post("/favoritos",async(req,res)=>{
 
 
 try{
+
 
 const {
 usuario_id,
@@ -220,6 +280,7 @@ INSERT INTO favoritos
 (usuario_id,nome,numero,imagem,tipo)
 
 VALUES($1,$2,$3,$4,$5)
+
 `,
 
 [
@@ -230,59 +291,42 @@ imagem,
 tipo
 ]
 
+
 );
 
 
+
 res.json({
+
 sucesso:true
+
 });
 
 
 }catch(err){
 
+
 console.log(err);
 
+
 res.status(500).json({
-erro:"Erro favorito"
+
+erro:"Erro favorito",
+detalhe:err.message
+
 });
 
 
 }
 
 
-});
-
-
-
-
-app.get("/favoritos/:usuario",async(req,res)=>{
-
-
-const result =
-await pool.query(
-
-`
-SELECT * FROM favoritos
-WHERE usuario_id=$1
-`,
-[req.params.usuario]
-
-);
-
-
-res.json(result.rows);
-
 
 });
 
 
 
 
-
-// =======================
-// START
-// =======================
-
+// =====================
 
 const PORT = process.env.PORT || 3000;
 
