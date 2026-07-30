@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const pool = require("./db");
 
 require("dotenv").config();
@@ -8,174 +9,40 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
+
+// arquivos públicos
 app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, "public")));
 
 
-// =============================
-// PÁGINA INICIAL
-// =============================
+// =======================
+// INDEX
+// =======================
 
-app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/index.html");
+app.get("/", (req,res)=>{
+    res.sendFile(path.join(__dirname,"index.html"));
 });
-app.use(express.static("public"));
 
-// =============================
+
+// =======================
 // RECADOS
-// =============================
+// =======================
 
-app.get("/recados", async (req,res)=>{
+app.get("/recados", async(req,res)=>{
 
-    res.json([
-        {
-            id:1,
-            nome:"Teste",
-            mensagem:"Servidor funcionando local!"
-        }
-    ]);
+    try{
 
-});
+        const result = await pool.query(
+            "SELECT * FROM recados ORDER BY id DESC"
+        );
 
-app.post("/recados", async (req, res) => {
+        res.json(result.rows);
 
-    const { nome, mensagem } = req.body;
+    }catch(err){
 
-    await pool.query(
-        "INSERT INTO recados(nome,mensagem) VALUES($1,$2)",
-        [nome, mensagem]
-    );
-
-    res.json({
-        sucesso: true
-    });
-
-});
-
-
-app.put("/recados/:id/curtir", async (req, res) => {
-
-    const { id } = req.params;
-
-    await pool.query(
-        `
-        UPDATE recados
-        SET curtidas = curtidas + 1
-        WHERE id=$1
-        `,
-        [id]
-    );
-
-    res.json({
-        sucesso:true
-    });
-
-});
-
-
-app.delete("/recados/:id", async (req,res)=>{
-
-    const {id}=req.params;
-
-    await pool.query(
-        "DELETE FROM recados WHERE id=$1",
-        [id]
-    );
-
-    res.json({
-        sucesso:true
-    });
-
-});
-
-
-app.put("/recados/:id", async(req,res)=>{
-
-    const {id}=req.params;
-
-    const {nome,mensagem}=req.body;
-
-
-    await pool.query(
-        `
-        UPDATE recados
-        SET nome=$1,
-            mensagem=$2
-        WHERE id=$3
-        `,
-        [nome,mensagem,id]
-    );
-
-
-    res.json({
-        sucesso:true
-    });
-
-});
-
-
-
-// =============================
-// CADASTRO
-// =============================
-
-app.post("/cadastro", async(req,res)=>{
-
-    const {nome,email,senha}=req.body;
-
-
-    await pool.query(
-        `
-        INSERT INTO usuarios(nome,email,senha)
-        VALUES($1,$2,$3)
-        `,
-        [nome,email,senha]
-    );
-
-
-    res.json({
-        sucesso:true,
-        mensagem:"Usuário criado!"
-    });
-
-});
-
-
-
-// =============================
-// LOGIN
-// =============================
-
-app.post("/login", async(req,res)=>{
-
-    const {email,senha}=req.body;
-
-
-    const resultado = await pool.query(
-        `
-        SELECT * FROM usuarios
-        WHERE email=$1 AND senha=$2
-        `,
-        [email,senha]
-    );
-
-
-    if(resultado.rows.length > 0){
-
-        res.json({
-
-            sucesso:true,
-
-            usuario:resultado.rows[0],
-
-            token:"pokemon-token"
-
-        });
-
-    }else{
-
-        res.json({
-            sucesso:false
+        console.log(err);
+        res.status(500).json({
+            erro:"Erro no banco"
         });
 
     }
@@ -184,78 +51,246 @@ app.post("/login", async(req,res)=>{
 
 
 
-// =============================
+app.post("/recados", async(req,res)=>{
+
+    try{
+
+        const {nome,mensagem}=req.body;
+
+
+        await pool.query(
+            `
+            INSERT INTO recados(nome,mensagem)
+            VALUES($1,$2)
+            `,
+            [nome,mensagem]
+        );
+
+
+        res.json({
+            sucesso:true
+        });
+
+
+    }catch(err){
+
+        console.log(err);
+
+        res.status(500).json({
+            erro:"Erro ao salvar"
+        });
+
+    }
+
+});
+
+
+
+// =======================
+// CADASTRO
+// =======================
+
+app.post("/cadastro", async(req,res)=>{
+
+
+try{
+
+const {nome,email,senha}=req.body;
+
+
+await pool.query(
+`
+INSERT INTO usuarios(nome,email,senha)
+VALUES($1,$2,$3)
+`,
+[nome,email,senha]
+);
+
+
+res.json({
+sucesso:true
+});
+
+
+}catch(err){
+
+console.log(err);
+
+res.status(500).json({
+erro:"Cadastro falhou"
+});
+
+
+}
+
+
+});
+
+
+
+
+// =======================
+// LOGIN
+// =======================
+
+app.post("/login",async(req,res)=>{
+
+
+try{
+
+
+const {email,senha}=req.body;
+
+
+const result = await pool.query(
+
+`
+SELECT * FROM usuarios
+WHERE email=$1
+AND senha=$2
+`,
+[email,senha]
+
+);
+
+
+
+if(result.rows.length){
+
+res.json({
+
+sucesso:true,
+
+usuario:result.rows[0]
+
+});
+
+
+}else{
+
+
+res.json({
+
+sucesso:false
+
+});
+
+
+}
+
+
+}catch(err){
+
+console.log(err);
+
+res.status(500).json({
+erro:"Erro login"
+});
+
+}
+
+
+});
+
+
+
+// =======================
 // FAVORITOS
-// =============================
+// =======================
 
-app.post("/favoritos", async(req,res)=>{
-
-
-    const {
-        usuario_id,
-        nome,
-        numero,
-        imagem,
-        tipo
-    } = req.body;
+app.post("/favoritos",async(req,res)=>{
 
 
+try{
 
-    await pool.query(
-        `
-        INSERT INTO favoritos
-        (usuario_id,nome,numero,imagem,tipo)
-
-        VALUES($1,$2,$3,$4,$5)
-        `,
-        [
-            usuario_id,
-            nome,
-            numero,
-            imagem,
-            tipo
-        ]
-    );
+const {
+usuario_id,
+nome,
+numero,
+imagem,
+tipo
+}=req.body;
 
 
-    res.json({
-        sucesso:true
-    });
+
+await pool.query(
+
+`
+INSERT INTO favoritos
+(usuario_id,nome,numero,imagem,tipo)
+
+VALUES($1,$2,$3,$4,$5)
+`,
+
+[
+usuario_id,
+nome,
+numero,
+imagem,
+tipo
+]
+
+);
+
+
+res.json({
+sucesso:true
+});
+
+
+}catch(err){
+
+console.log(err);
+
+res.status(500).json({
+erro:"Erro favorito"
+});
+
+
+}
+
 
 });
 
 
 
-app.get("/favoritos/:usuario", async(req,res)=>{
+
+app.get("/favoritos/:usuario",async(req,res)=>{
 
 
-    const {usuario}=req.params;
+const result =
+await pool.query(
+
+`
+SELECT * FROM favoritos
+WHERE usuario_id=$1
+`,
+[req.params.usuario]
+
+);
 
 
-    const resultado = await pool.query(
-        `
-        SELECT * FROM favoritos
-        WHERE usuario_id=$1
-        `,
-        [usuario]
-    );
+res.json(result.rows);
 
-
-    res.json(resultado.rows);
 
 });
 
 
 
-// =============================
-// SERVIDOR
-// =============================
+
+
+// =======================
+// START
+// =======================
+
 
 const PORT = process.env.PORT || 3000;
 
 
 app.listen(PORT,()=>{
 
-    console.log(`Servidor rodando na porta ${PORT}`);
+console.log(
+`Servidor rodando na porta ${PORT}`
+);
 
 });
