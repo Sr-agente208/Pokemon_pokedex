@@ -1,46 +1,133 @@
-// ==============================
-// CRIAR CONTA
-// ==============================
+// ======================================
+// SISTEMA DE USUÁRIOS
+// ======================================
 
+
+// CRIAR CONTA
 function criarConta(){
 
-console.log("Botão criar conta funcionando");
+    const nome = document.getElementById("nome").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const senha = document.getElementById("senha").value.trim();
 
 
-let nome = document.getElementById("nome").value;
-let email = document.getElementById("email").value;
-let senha = document.getElementById("senha").value;
+    if(!nome || !email || !senha){
+
+        alert("Preencha todos os campos!");
+        return;
+
+    }
 
 
-console.log(nome,email,senha);
+    let usuarios = JSON.parse(
+        localStorage.getItem("usuarios")
+    ) || [];
 
 
-if(nome === "" || email === "" || senha === ""){
+    let existe = usuarios.find(
+        usuario => usuario.email === email
+    );
 
-alert("Preencha todos os campos!");
 
-return;
+    if(existe){
+
+        alert("Esse email já está cadastrado!");
+        return;
+
+    }
+
+
+    usuarios.push({
+
+        nome,
+        email,
+        senha
+
+    });
+
+
+    localStorage.setItem(
+        "usuarios",
+        JSON.stringify(usuarios)
+    );
+
+
+    alert("✅ Conta criada com sucesso!");
+
+
+    window.location.href="login.html";
 
 }
 
 
-localStorage.setItem(
-"usuario",
-JSON.stringify({
-
-nome:nome,
-email:email,
-senha:senha
-
-})
-);
 
 
+// LOGIN
 
-alert("Conta criada!");
+function login(){
+
+    const email =
+    document.getElementById("email").value.trim();
 
 
-window.location.href="login.html";
+    const senha =
+    document.getElementById("senha").value.trim();
+
+
+
+    if(!email || !senha){
+
+        alert("Preencha todos os campos!");
+        return;
+
+    }
+
+
+
+    let usuarios = JSON.parse(
+        localStorage.getItem("usuarios")
+    ) || [];
+
+
+
+    let usuario = usuarios.find(
+
+        u => 
+        u.email === email &&
+        u.senha === senha
+
+    );
+
+
+
+    if(!usuario){
+
+        alert("❌ Email ou senha incorretos!");
+        return;
+
+    }
+
+
+
+    localStorage.setItem(
+        "logado",
+        "true"
+    );
+
+
+    localStorage.setItem(
+
+        "usuarioLogado",
+
+        JSON.stringify(usuario)
+
+    );
+
+
+
+    alert("✅ Login realizado!");
+
+    window.location.href="index.html";
 
 
 }
@@ -49,43 +136,43 @@ window.location.href="login.html";
 
 
 
-// ==============================
-// PROTEGER POKÉDEX
-// ==============================
+// SAIR
+
+function sair(){
+
+    localStorage.removeItem(
+        "logado"
+    );
+
+
+    localStorage.removeItem(
+        "usuarioLogado"
+    );
+
+
+    window.location.href="login.html";
+
+}
+
+
+
+
+
+// ======================================
+// PROTEGER PÁGINAS
+// ======================================
 
 
 function verificarLogin(){
 
 
-if(!localStorage.getItem("logado")){
+    if(
+    !localStorage.getItem("logado")
+    ){
 
+        window.location.href="login.html";
 
-window.location.href="login.html";
-
-
-}
-
-
-}
-
-
-
-
-
-// ==============================
-// SAIR
-// ==============================
-
-
-function sair(){
-
-
-localStorage.removeItem("logado");
-
-localStorage.removeItem("usuarioLogado");
-
-
-window.location.href="login.html";
+    }
 
 
 }
@@ -94,235 +181,273 @@ window.location.href="login.html";
 
 
 
-// ==============================
+// ======================================
 // FAVORITOS
-// ==============================
+// ======================================
+
+
+
+function chaveFavoritos(){
+
+
+    let usuario =
+    JSON.parse(
+        localStorage.getItem("usuarioLogado")
+    );
+
+
+    if(!usuario){
+
+        return "favoritos";
+
+    }
+
+
+    return "favoritos_" + usuario.email;
+
+
+}
+
+
+
 
 
 function favoritarPokemon(pokemon){
 
 
 
-if(!pokemon){
+    if(!pokemon){
 
-alert("Nenhum Pokémon selecionado!");
+        alert("Nenhum Pokémon selecionado!");
+        return;
 
-return;
+    }
+
+
+
+    let favoritos = JSON.parse(
+
+        localStorage.getItem(
+            chaveFavoritos()
+        )
+
+    ) || [];
+
+
+
+    let existe = favoritos.find(
+
+        p => p.numero === pokemon.id
+
+    );
+
+
+
+    if(existe){
+
+        alert("Esse Pokémon já está nos favoritos!");
+
+        return;
+
+    }
+
+
+
+
+    favoritos.push({
+
+        nome:pokemon.name,
+
+        numero:pokemon.id,
+
+        imagem:
+        pokemon.sprites.other["official-artwork"].front_default,
+
+
+        tipo:
+        pokemon.types
+        .map(t=>t.type.name)
+        .join(", ")
+
+
+    });
+
+
+
+    localStorage.setItem(
+
+        chaveFavoritos(),
+
+        JSON.stringify(favoritos)
+
+    );
+
+
+
+    alert("⭐ Pokémon favoritado!");
+
+
 
 }
 
 
 
-let favoritos = JSON.parse(
 
-localStorage.getItem("favoritos")
-
-) || [];
-
-
-
-
-favoritos.push({
-
-
-nome:pokemon.name,
-
-
-numero:pokemon.id,
-
-
-imagem:
-
-pokemon.sprites.other["official-artwork"].front_default,
-
-
-tipo:
-
-pokemon.types[0].type.name
-
-
-});
-
-
-
-
-
-localStorage.setItem(
-
-"favoritos",
-
-JSON.stringify(favoritos)
-
-);
-
-
-
-alert("⭐ Pokémon salvo nos favoritos!");
-
-
-
-}
-
-
-
-
-
-// ==============================
-// CARREGAR FAVORITOS
-// ==============================
 
 
 function carregarFavoritos(){
 
 
-
-let lista = document.getElementById(
-
-"listaFavoritos"
-
-);
+    let lista =
+    document.getElementById(
+        "listaFavoritos"
+    );
 
 
-
-if(!lista)return;
+    if(!lista)return;
 
 
 
-let favoritos = JSON.parse(
+    let favoritos =
+    JSON.parse(
 
-localStorage.getItem("favoritos")
+        localStorage.getItem(
+            chaveFavoritos()
+        )
 
-) || [];
-
-
-
-
-lista.innerHTML="";
+    ) || [];
 
 
 
+    lista.innerHTML="";
 
-if(favoritos.length === 0){
 
 
-lista.innerHTML=
+    if(favoritos.length===0){
 
-"<h2>😢 Nenhum favorito salvo</h2>";
 
-return;
+        lista.innerHTML=
+        "<h2>😢 Nenhum favorito salvo</h2>";
+
+        return;
+
+    }
+
+
+
+
+    favoritos.forEach(
+    (pokemon,index)=>{
+
+
+        lista.innerHTML += `
+
+
+        <div class="pokemon-card">
+
+
+        <h2>
+        ${pokemon.nome}
+        </h2>
+
+
+        <img src="${pokemon.imagem}">
+
+
+        <p>
+        🔢 Número: #${pokemon.numero}
+        </p>
+
+
+        <p>
+        🌈 Tipo: ${pokemon.tipo}
+        </p>
+
+
+        <button 
+        onclick="removerFavorito(${index})">
+
+        🗑 Remover
+
+        </button>
+
+
+        </div>
+
+
+        `;
+
+
+    });
+
 
 
 }
 
 
 
-
-favoritos.forEach((pokemon,index)=>{
-
-
-lista.innerHTML += `
-
-
-<div class="pokemon-card">
-
-
-<h2>${pokemon.nome}</h2>
-
-
-<img src="${pokemon.imagem}" width="150">
-
-
-<p>🔢 Número: #${pokemon.numero}</p>
-
-
-<p>🌈 Tipo: ${pokemon.tipo}</p>
-
-
-
-<button onclick="removerFavorito(${index})">
-
-🗑 Remover
-
-</button>
-
-
-
-</div>
-
-
-`;
-
-
-
-});
-
-
-}
-
-
-
-
-
-// ==============================
-// REMOVER FAVORITO
-// ==============================
 
 
 function removerFavorito(index){
 
 
-let favoritos = JSON.parse(
+    let favoritos =
+    JSON.parse(
 
-localStorage.getItem("favoritos")
+        localStorage.getItem(
+            chaveFavoritos()
+        )
 
-) || [];
-
-
-
-favoritos.splice(index,1);
-
-
-
-localStorage.setItem(
-
-"favoritos",
-
-JSON.stringify(favoritos)
-
-);
+    ) || [];
 
 
 
-carregarFavoritos();
+    favoritos.splice(index,1);
+
+
+
+    localStorage.setItem(
+
+        chaveFavoritos(),
+
+        JSON.stringify(favoritos)
+
+    );
+
+
+
+    carregarFavoritos();
 
 
 }
-);
-
-
-}
 
 
 
 
 
-// ======================
+
+// ======================================
 // WORD
-// ======================
+// ======================================
 
 
 function baixarWord(){
 
 
-if(!pokemonAtual)return;
+    if(!window.pokemonAtual){
+
+        alert("Pesquise um Pokémon primeiro!");
+        return;
+
+    }
 
 
 
-let p=pokemonAtual;
+    let p = window.pokemonAtual;
 
 
 
-let texto=`
+    let texto = `
 
 POKÉDEX
 
@@ -330,76 +455,48 @@ Nome: ${p.name}
 
 Número: ${p.id}
 
-Tipo: ${p.types[0].type.name}
+Tipos:
+${p.types.map(t=>t.type.name).join(", ")}
 
-Altura: ${p.height/10}m
+Altura:
+${p.height/10} metros
 
-Peso: ${p.weight/10}kg
+Peso:
+${p.weight/10} kg
 
-`;
-
-
-
-let arquivo=new Blob(
-
-[texto],
-
-{type:"application/msword"}
-
-);
+    `;
 
 
 
-let link=document.createElement("a");
+    let blob = new Blob(
+
+        [texto],
+
+        {
+            type:
+            "application/msword"
+        }
+
+    );
 
 
-link.href=URL.createObjectURL(arquivo);
+
+    let link =
+    document.createElement("a");
 
 
-link.download=p.name+".doc";
+
+    link.href =
+    URL.createObjectURL(blob);
 
 
-link.click();
+
+    link.download =
+    p.name + ".doc";
 
 
-}
 
-// ==============================
-// LOGIN
-// ==============================
+    link.click();
 
-function login() {
-
-    let email = document.getElementById("email").value.trim();
-    let senha = document.getElementById("senha").value.trim();
-
-    if (email === "" || senha === "") {
-        alert("Preencha todos os campos!");
-        return;
-    }
-
-    let usuario = JSON.parse(localStorage.getItem("usuario"));
-
-    if (!usuario) {
-        alert("Nenhuma conta encontrada. Crie uma conta primeiro.");
-        window.location.href = "cadastro.html";
-        return;
-    }
-
-    if (email === usuario.email && senha === usuario.senha) {
-
-        localStorage.setItem("logado", "true");
-        localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
-
-        alert("✅ Login realizado com sucesso!");
-
-        window.location.href = "index.html";
-
-    } else {
-
-        alert("❌ Email ou senha incorretos!");
-
-    }
 
 }
-
