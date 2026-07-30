@@ -25,16 +25,17 @@ app.use(express.static("public"));
 // RECADOS
 // =============================
 
-app.get("/recados", async (req, res) => {
+app.get("/recados", async (req,res)=>{
 
-    const resultado = await pool.query(
-        "SELECT * FROM recados ORDER BY id DESC"
-    );
-
-    res.json(resultado.rows);
+    res.json([
+        {
+            id:1,
+            nome:"Teste",
+            mensagem:"Servidor funcionando local!"
+        }
+    ]);
 
 });
-
 
 app.post("/recados", async (req, res) => {
 
