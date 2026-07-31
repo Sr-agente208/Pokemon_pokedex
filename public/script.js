@@ -503,8 +503,9 @@ ${p.weight/10} kg
 
 }
 
+
 // ======================================
-// MURAL DE RECADOS - BACKUP OFFLINE
+// MURAL DE RECADOS - OFFLINE FIRST
 // ======================================
 
 
@@ -512,10 +513,7 @@ async function salvarRecado(){
 
     const campo = document.getElementById("recado");
 
-    if(!campo){
-        console.log("Campo recado não encontrado");
-        return;
-    }
+    if(!campo) return;
 
 
     const texto = campo.value.trim();
@@ -546,69 +544,52 @@ async function salvarRecado(){
 
 
 
+    // SEMPRE salva primeiro no navegador
+    let locais =
+    JSON.parse(
+        localStorage.getItem("recadosOffline")
+    ) || [];
+
+
+    locais.push(recado);
+
+
+    localStorage.setItem(
+        "recadosOffline",
+        JSON.stringify(locais)
+    );
+
+
+
+    // tenta mandar para o Railway
+
     try{
 
 
-        const resposta = await fetch("/recados",{
+        await fetch("/recados",{
 
             method:"POST",
 
             headers:{
-
                 "Content-Type":"application/json"
-
             },
 
-            body:JSON.stringify(recado)
+            body:JSON.stringify(recado),
+
+            signal: AbortSignal.timeout(3000)
 
         });
 
 
 
-        if(!resposta.ok){
-
-            throw new Error("Railway offline");
-
-        }
+        console.log("☁️ Enviado para servidor");
 
 
-
-        alert("🚀 Recado salvo no servidor!");
-
-
-
-    }catch(erro){
+    }catch{
 
 
         console.log(
-            "Railway fora do ar. Usando backup local 💾"
-        );
-
-
-        let recados = JSON.parse(
-
-            localStorage.getItem("recadosOffline")
-
-        ) || [];
-
-
-
-        recados.push(recado);
-
-
-
-        localStorage.setItem(
-
-            "recadosOffline",
-
-            JSON.stringify(recados)
-
-        );
-
-
-
-        alert(
-            "⚠️ Railway offline!\nRecado salvo no navegador."
+            "💾 Salvo somente no navegador"
         );
 
 
@@ -618,10 +599,10 @@ async function salvarRecado(){
 
     campo.value="";
 
-
     carregarRecados();
 
 }
+
 
 
 
@@ -637,52 +618,14 @@ async function carregarRecados(){
 
 
 
-    try{
-
-
-        const resposta =
-        await fetch("/recados");
-
-
-
-        if(!resposta.ok){
-
-            throw new Error();
-
-        }
+    let recados =
+    JSON.parse(
+        localStorage.getItem("recadosOffline")
+    ) || [];
 
 
 
-        const dados =
-        await resposta.json();
-
-
-
-        mostrarRecados(dados);
-
-
-
-    }catch{
-
-
-        console.log(
-            "Carregando recados locais"
-        );
-
-
-        const dados =
-        JSON.parse(
-
-            localStorage.getItem("recadosOffline")
-
-        ) || [];
-
-
-
-        mostrarRecados(dados);
-
-
-    }
+    mostrarRecados(recados);
 
 
 }
@@ -701,11 +644,23 @@ function mostrarRecados(recados){
     if(!lista)return;
 
 
+
     lista.innerHTML="";
 
 
 
-    recados.forEach(r=>{
+    if(recados.length===0){
+
+        lista.innerHTML =
+        "<h2>Nenhum recado ainda 😢</h2>";
+
+        return;
+
+    }
+
+
+
+    recados.reverse().forEach(r=>{
 
 
         lista.innerHTML += `
@@ -716,7 +671,7 @@ function mostrarRecados(recados){
 
             <p>${r.texto}</p>
 
-            <small>${r.data}</small>
+            <small>📅 ${r.data}</small>
 
         </div>
 
