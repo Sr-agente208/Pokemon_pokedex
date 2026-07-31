@@ -21,6 +21,7 @@ app.use(express.static(__dirname));
 // arquivos da pasta public
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(__dirname));
+app.use(express.static("public"));
 
 
 // =====================
