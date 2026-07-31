@@ -502,3 +502,228 @@ ${p.weight/10} kg
 
 
 }
+
+// ======================================
+// MURAL DE RECADOS - BACKUP OFFLINE
+// ======================================
+
+
+async function salvarRecado(){
+
+    const campo = document.getElementById("recado");
+
+    if(!campo){
+        console.log("Campo recado não encontrado");
+        return;
+    }
+
+
+    const texto = campo.value.trim();
+
+
+    if(!texto){
+
+        alert("Digite um recado!");
+        return;
+
+    }
+
+
+    const recado = {
+
+        id: Date.now(),
+
+        texto:texto,
+
+        usuario:
+        JSON.parse(localStorage.getItem("usuarioLogado"))
+        ?.nome || "Anônimo",
+
+        data:
+        new Date().toLocaleString()
+
+    };
+
+
+
+    try{
+
+
+        const resposta = await fetch("/recados",{
+
+            method:"POST",
+
+            headers:{
+
+                "Content-Type":"application/json"
+
+            },
+
+            body:JSON.stringify(recado)
+
+        });
+
+
+
+        if(!resposta.ok){
+
+            throw new Error("Railway offline");
+
+        }
+
+
+
+        alert("🚀 Recado salvo no servidor!");
+
+
+
+    }catch(erro){
+
+
+        console.log(
+            "Railway fora do ar. Usando backup local 💾"
+        );
+
+
+        let recados = JSON.parse(
+
+            localStorage.getItem("recadosOffline")
+
+        ) || [];
+
+
+
+        recados.push(recado);
+
+
+
+        localStorage.setItem(
+
+            "recadosOffline",
+
+            JSON.stringify(recados)
+
+        );
+
+
+
+        alert(
+            "⚠️ Railway offline!\nRecado salvo no navegador."
+        );
+
+
+    }
+
+
+
+    campo.value="";
+
+
+    carregarRecados();
+
+}
+
+
+
+
+async function carregarRecados(){
+
+
+    const lista =
+    document.getElementById("listaRecados");
+
+
+    if(!lista)return;
+
+
+
+    try{
+
+
+        const resposta =
+        await fetch("/recados");
+
+
+
+        if(!resposta.ok){
+
+            throw new Error();
+
+        }
+
+
+
+        const dados =
+        await resposta.json();
+
+
+
+        mostrarRecados(dados);
+
+
+
+    }catch{
+
+
+        console.log(
+            "Carregando recados locais"
+        );
+
+
+        const dados =
+        JSON.parse(
+
+            localStorage.getItem("recadosOffline")
+
+        ) || [];
+
+
+
+        mostrarRecados(dados);
+
+
+    }
+
+
+}
+
+
+
+
+
+function mostrarRecados(recados){
+
+
+    const lista =
+    document.getElementById("listaRecados");
+
+
+    if(!lista)return;
+
+
+    lista.innerHTML="";
+
+
+
+    recados.forEach(r=>{
+
+
+        lista.innerHTML += `
+
+        <div class="pokemon-card">
+
+            <h3>💬 ${r.usuario}</h3>
+
+            <p>${r.texto}</p>
+
+            <small>${r.data}</small>
+
+        </div>
+
+        `;
+
+
+    });
+
+
+}
