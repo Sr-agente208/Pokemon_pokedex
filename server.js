@@ -11,15 +11,30 @@ app.use(cors());
 app.use(express.json());
 
 
-// arquivos do site
+// =====================
+// ARQUIVOS DO SITE
+// =====================
+
+// arquivos da raiz (index.html)
 app.use(express.static(__dirname));
 
+// arquivos da pasta public
+app.use(
+    "/public",
+    express.static(path.join(__dirname, "public"))
+);
 
-// página inicial
-app.get("/", (req,res)=>{
+
+// =====================
+// PÁGINA INICIAL
+// =====================
+
+app.get("/", (req, res) => {
+
     res.sendFile(
-        path.join(__dirname,"public","index.html")
+        path.join(__dirname, "index.html")
     );
+
 });
 
 
@@ -27,7 +42,7 @@ app.get("/", (req,res)=>{
 // TESTE BANCO
 // =====================
 
-app.get("/teste-banco", async(req,res)=>{
+app.get("/teste-banco", async (req,res)=>{
 
     try{
 
@@ -36,23 +51,27 @@ app.get("/teste-banco", async(req,res)=>{
         );
 
         res.json({
+
             conectado:true,
             banco:result.rows
+
         });
+
 
     }catch(err){
 
         console.log(err);
 
         res.status(500).json({
+
             erro:"Erro no banco",
             detalhe:err.message
+
         });
 
     }
 
 });
-
 
 
 // =====================
@@ -75,8 +94,10 @@ app.get("/recados", async(req,res)=>{
         console.log(err);
 
         res.status(500).json({
+
             erro:"Erro no banco",
             detalhe:err.message
+
         });
 
     }
@@ -105,7 +126,9 @@ app.post("/recados", async(req,res)=>{
 
 
         res.json({
+
             sucesso:true
+
         });
 
 
@@ -114,15 +137,15 @@ app.post("/recados", async(req,res)=>{
         console.log(err);
 
         res.status(500).json({
+
             erro:"Erro no banco",
             detalhe:err.message
+
         });
 
     }
 
-
 });
-
 
 
 
@@ -130,52 +153,46 @@ app.post("/recados", async(req,res)=>{
 // CADASTRO
 // =====================
 
-
 app.post("/cadastro", async(req,res)=>{
 
+    try{
 
-try{
-
-const {nome,email,senha}=req.body;
-
-
-await pool.query(
-
-`
-INSERT INTO usuarios(nome,email,senha)
-VALUES($1,$2,$3)
-`,
-
-[nome,email,senha]
-
-);
+        const {nome,email,senha}=req.body;
 
 
+        await pool.query(
 
-res.json({
+            `
+            INSERT INTO usuarios(nome,email,senha)
+            VALUES($1,$2,$3)
+            `,
 
-sucesso:true
+            [nome,email,senha]
 
-});
-
-
-}catch(err){
-
-console.log(err);
-
-res.status(500).json({
-
-erro:"Erro no cadastro",
-detalhe:err.message
-
-});
-
-}
+        );
 
 
+        res.json({
+
+            sucesso:true
+
+        });
+
+
+    }catch(err){
+
+        console.log(err);
+
+        res.status(500).json({
+
+            erro:"Erro no cadastro",
+            detalhe:err.message
+
+        });
+
+    }
 
 });
-
 
 
 
@@ -183,72 +200,61 @@ detalhe:err.message
 // LOGIN
 // =====================
 
+app.post("/login", async(req,res)=>{
 
-app.post("/login",async(req,res)=>{
+    try{
 
-
-try{
-
-
-const {email,senha}=req.body;
+        const {email,senha}=req.body;
 
 
-const result = await pool.query(
+        const result = await pool.query(
 
-`
-SELECT * FROM usuarios
-WHERE email=$1 AND senha=$2
-`,
+            `
+            SELECT * FROM usuarios
+            WHERE email=$1 AND senha=$2
+            `,
 
-[email,senha]
+            [email,senha]
 
-);
-
-
-
-if(result.rows.length){
-
-res.json({
-
-sucesso:true,
-usuario:result.rows[0]
-
-});
+        );
 
 
-}else{
+        if(result.rows.length){
+
+            res.json({
+
+                sucesso:true,
+                usuario:result.rows[0]
+
+            });
 
 
-res.json({
+        }else{
 
-sucesso:false
+            res.json({
 
-});
+                sucesso:false
 
+            });
 
-}
+        }
 
 
 
-}catch(err){
+    }catch(err){
 
+        console.log(err);
 
-console.log(err);
+        res.status(500).json({
 
+            erro:"Erro login",
+            detalhe:err.message
 
-res.status(500).json({
+        });
 
-erro:"Erro login",
-detalhe:err.message
+    }
 
 });
-
-
-}
-
-
-});
-
 
 
 
@@ -256,76 +262,68 @@ detalhe:err.message
 // FAVORITOS
 // =====================
 
+app.post("/favoritos", async(req,res)=>{
 
-app.post("/favoritos",async(req,res)=>{
+    try{
 
+        const {
+            usuario_id,
+            nome,
+            numero,
+            imagem,
+            tipo
 
-try{
-
-
-const {
-usuario_id,
-nome,
-numero,
-imagem,
-tipo
-}=req.body;
+        } = req.body;
 
 
 
-await pool.query(
+        await pool.query(
 
-`
-INSERT INTO favoritos
-(usuario_id,nome,numero,imagem,tipo)
+            `
+            INSERT INTO favoritos
+            (usuario_id,nome,numero,imagem,tipo)
 
-VALUES($1,$2,$3,$4,$5)
+            VALUES($1,$2,$3,$4,$5)
+            `,
 
-`,
+            [
+                usuario_id,
+                nome,
+                numero,
+                imagem,
+                tipo
+            ]
 
-[
-usuario_id,
-nome,
-numero,
-imagem,
-tipo
-]
-
-
-);
+        );
 
 
+        res.json({
 
-res.json({
+            sucesso:true
 
-sucesso:true
-
-});
-
-
-}catch(err){
+        });
 
 
-console.log(err);
 
+    }catch(err){
 
-res.status(500).json({
+        console.log(err);
 
-erro:"Erro favorito",
-detalhe:err.message
+        res.status(500).json({
 
-});
+            erro:"Erro favorito",
+            detalhe:err.message
 
+        });
 
-}
-
-
+    }
 
 });
 
 
 
-
+// =====================
+// INICIAR SERVIDOR
 // =====================
 
 const PORT = process.env.PORT || 3000;
@@ -333,8 +331,8 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT,()=>{
 
-console.log(
-`Servidor rodando na porta ${PORT}`
-);
+    console.log(
+        `Servidor rodando na porta ${PORT}`
+    );
 
 });
