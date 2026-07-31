@@ -1,9 +1,7 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "pokemon-pokedex",
   "compatibility_date": "2026-07-31",
-
   "assets": {
-    "directory": "./public"
+    "directory": "."
   }
 }
