@@ -1,7 +1,7 @@
 {
-  "name": "pokemon-pokedex",
+  "name": "pokemon-pokede",
   "compatibility_date": "2026-07-31",
   "assets": {
-    "directory": "."
+    "directory": "./public"
   }
 }
