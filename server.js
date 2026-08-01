@@ -109,7 +109,8 @@ app.post("/recados", async(req,res)=>{
 
     try{
 
-        const {nome,mensagem}=req.body;
+        const nome = req.body.nome || req.body.usuario || "Anônimo";
+        const mensagem = req.body.mensagem || req.body.texto || "";
 
 
         await pool.query(
@@ -182,10 +183,15 @@ app.post("/cadastro", async(req,res)=>{
 
         console.log(err);
 
+        let msg = err.message;
+        if (err.code === '23505') {
+            msg = "Este email já está cadastrado!";
+        }
+
         res.status(500).json({
 
             erro:"Erro no cadastro",
-            detalhe:err.message
+            detalhe:msg
 
         });
 
@@ -317,6 +323,34 @@ app.post("/favoritos", async(req,res)=>{
 
     }
 
+});
+
+app.get("/favoritos/:usuario_id", async(req, res) => {
+    try {
+        const { usuario_id } = req.params;
+        const result = await pool.query(
+            "SELECT * FROM favoritos WHERE usuario_id = $1 ORDER BY id DESC",
+            [usuario_id]
+        );
+        res.json(result.rows);
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ erro: "Erro ao buscar favoritos", detalhe: err.message });
+    }
+});
+
+app.delete("/favoritos/:usuario_id/:numero", async(req, res) => {
+    try {
+        const { usuario_id, numero } = req.params;
+        await pool.query(
+            "DELETE FROM favoritos WHERE usuario_id = $1 AND numero = $2",
+            [usuario_id, numero]
+        );
+        res.json({ sucesso: true });
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ erro: "Erro ao deletar favorito", detalhe: err.message });
+    }
 });
 
 

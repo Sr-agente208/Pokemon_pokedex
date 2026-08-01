@@ -141,6 +141,13 @@
     </div>
 
     <script>
+        function getApiUrl(path) {
+            if (window.location.port === "3000" || window.location.hostname.includes("railway.app")) {
+                return path;
+            }
+            return "http://localhost:3000" + path;
+        }
+
         document.getElementById('formCadastro').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -154,7 +161,7 @@
             sucesso.textContent = '';
 
             try {
-                const response = await fetch('/cadastro', {
+                const response = await fetch(getApiUrl('/cadastro'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome, email, senha })
@@ -168,11 +175,34 @@
                         window.location.href = 'login.html';
                     }, 2000);
                 } else {
-                    erro.textContent = '❌ Erro ao cadastrar';
+                    erro.textContent = '❌ ' + (data.detalhe || 'Erro ao cadastrar');
                 }
             } catch (err) {
-                erro.textContent = '❌ Erro ao conectar ao servidor';
-                console.log(err);
+                console.log("Server registration failed, using localStorage fallback:", err);
+                
+                let usuarios = [];
+                try {
+                    usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+                    if (!Array.isArray(usuarios)) {
+                        usuarios = [];
+                    }
+                } catch(e) {
+                    usuarios = [];
+                }
+
+                let existe = usuarios.find(u => u && u.email && u.email.toLowerCase() === email.toLowerCase());
+                
+                if (existe) {
+                    erro.textContent = '❌ Este email já está cadastrado! (Offline)';
+                } else {
+                    usuarios.push({ id: Date.now(), nome, email, senha });
+                    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+                    
+                    sucesso.textContent = '✅ Cadastro realizado (Offline)! Redirecionando...';
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                }
             }
         });
     </script>
