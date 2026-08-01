@@ -1,6 +1,6 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "deploy": {
-    "startCommand": "node server.js"
+    "startCommand": "node src/server.js"
   }
 }

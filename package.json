@@ -1,10 +1,11 @@
 {
-  "name": "mural-recados",
+  "name": "pokemon-pokedex",
   "version": "1.0.0",
-  "description": "Mural de recados Railway",
-  "main": "server.js",
+  "description": "Pokédex app com Railway",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon src/server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -14,5 +15,8 @@
     "file-saver": "^2.0.5",
     "jspdf": "^4.2.1",
     "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

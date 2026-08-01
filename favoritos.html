@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⭐ Favoritos - Pokéé Pesquisa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #111;
+            color: white;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 36px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: #ef5350;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card img {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+        }
+
+        .vazio {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <main>
+        <div class="header">
+            <h1>⭐ Meus Favoritos</h1>
+            <button onclick="window.location.href='index.html'">← Voltar</button>
+        </div>
+
+        <div class="grid" id="favoritos">
+            <div class="vazio">Nenhum favorito ainda. Pesquise um Pokémon e adicione aos favoritos!</div>
+        </div>
+    </main>
+
+    <script>
+        window.onload = function () {
+            if (!localStorage.getItem("logado")) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            carregarFavoritos();
+        };
+
+        function carregarFavoritos() {
+            const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+            const container = document.getElementById("favoritos");
+
+            if (favoritos.length === 0) {
+                container.innerHTML = '<div class="vazio">Nenhum favorito ainda. Pesquise um Pokémon e adicione aos favoritos!</div>';
+                return;
+            }
+
+            container.innerHTML = favoritos.map((fav, index) => `
+                <div class="card">
+                    <img src="${fav.imagem}" alt="${fav.nome}">
+                    <h3>${fav.nome.toUpperCase()}</h3>
+                    <p>#${fav.numero}</p>
+                    <p>Tipo: ${fav.tipo}</p>
+                    <button onclick="remover(${index})">❌ Remover</button>
+                </div>
+            `).join('');
+        }
+
+        function remover(index) {
+            let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+            favoritos.splice(index, 1);
+            localStorage.setItem("favoritos", JSON.stringify(favoritos));
+            carregarFavoritos();
+        }
+    </script>
+
+</body>
+</html>
