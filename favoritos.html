@@ -104,6 +104,13 @@
     </main>
 
     <script>
+        function getApiUrl(path) {
+            if (window.location.port === "3000" || window.location.hostname.includes("railway.app")) {
+                return path;
+            }
+            return "http://localhost:3000" + path;
+        }
+
         window.onload = function () {
             if (!localStorage.getItem("logado")) {
                 window.location.href = "login.html";
@@ -127,7 +134,7 @@
             const usuario_id = usuario.id;
 
             try {
-                const response = await fetch(`/favoritos/${usuario_id}`);
+                const response = await fetch(getApiUrl(`/favoritos/${usuario_id}`));
                 if (!response.ok) throw new Error("Erro no servidor");
                 const favoritos = await response.json();
 
@@ -178,7 +185,7 @@
             const usuario_id = usuario.id;
 
             try {
-                const response = await fetch(`/favoritos/${usuario_id}/${numero}`, {
+                const response = await fetch(getApiUrl(`/favoritos/${usuario_id}/${numero}`), {
                     method: "DELETE"
                 });
                 const data = await response.json();

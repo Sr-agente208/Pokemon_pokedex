@@ -141,6 +141,13 @@
     </div>
 
     <script>
+        function getApiUrl(path) {
+            if (window.location.port === "3000" || window.location.hostname.includes("railway.app")) {
+                return path;
+            }
+            return "http://localhost:3000" + path;
+        }
+
         document.getElementById('formCadastro').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -154,7 +161,7 @@
             sucesso.textContent = '';
 
             try {
-                const response = await fetch('/cadastro', {
+                const response = await fetch(getApiUrl('/cadastro'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome, email, senha })

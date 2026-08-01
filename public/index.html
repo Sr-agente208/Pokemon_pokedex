@@ -490,6 +490,12 @@ src=""
 </main>
 
 <script>
+function getApiUrl(path) {
+    if (window.location.port === "3000" || window.location.hostname.includes("railway.app")) {
+        return path;
+    }
+    return "http://localhost:3000" + path;
+}
 
 const TOTAL = 1025;
 
@@ -870,7 +876,7 @@ let usuario = JSON.parse(usuarioLogadoRaw);
 let usuario_id = usuario.id;
 
 try {
-    const response = await fetch("/favoritos", {
+    const response = await fetch(getApiUrl("/favoritos"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
