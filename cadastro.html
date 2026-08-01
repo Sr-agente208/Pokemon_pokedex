@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📝 Cadastro - Pokéé Pesquisa</title>
+    <title>📝 Cadastro - Poké Pesquisa</title>
     <style>
         * {
             margin: 0;
@@ -141,12 +142,7 @@
     </div>
 
     <script>
-        function getApiUrl(path) {
-            if (window.location.port === "3000" || window.location.hostname.includes("railway.app")) {
-                return path;
-            }
-            return "http://localhost:3000" + path;
-        }
+        const API_URL = 'https://pokemonpokedex-production-0fc5.up.railway.app';
 
         document.getElementById('formCadastro').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -161,7 +157,7 @@
             sucesso.textContent = '';
 
             try {
-                const response = await fetch(getApiUrl('/cadastro'), {
+                const response = await fetch(`${API_URL}/cadastro`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome, email, senha })
@@ -175,6 +171,7 @@
                         window.location.href = 'login.html';
                     }, 2000);
                 } else {
+                  arena/019fbb59-pokemon-pokedex
                     erro.textContent = '❌ ' + (data.detalhe || 'Erro ao cadastrar');
                 }
             } catch (err) {
@@ -203,6 +200,13 @@
                         window.location.href = 'login.html';
                     }, 2000);
                 }
+                =======
+                    erro.textContent = '❌ Erro ao cadastrar';
+                }
+            } catch (err) {
+                erro.textContent = '❌ Erro ao conectar ao servidor';
+                console.log(err);
+          main
             }
         });
     </script>
