@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Cadastro - Poké Pesquisa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ef5350 0%, #1976d2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: min(400px, 90vw);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ef5350;
+            font-size: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #ef5350;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #ef5350;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(239, 83, 80, 0.3);
+        }
+
+        .voltar {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        a {
+            color: #1976d2;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #erro {
+            color: #d32f2f;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        #sucesso {
+            color: #388e3c;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📝 Cadastro</h1>
+        
+        <div id="erro"></div>
+        <div id="sucesso"></div>
+
+        <form id="formCadastro">
+            <div class="form-group">
+                <label for="nome">👤 Nome:</label>
+                <input type="text" id="nome" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">📧 Email:</label>
+                <input type="email" id="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="senha">🔑 Senha:</label>
+                <input type="password" id="senha" required>
+            </div>
+
+            <button type="submit">Criar Conta</button>
+        </form>
+
+        <div class="voltar">
+            <a href="login.html">Já tem conta? Faça login</a>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://pokemonpokedex-production-0fc5.up.railway.app';
+
+        document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const erro = document.getElementById('erro');
+            const sucesso = document.getElementById('sucesso');
+
+            erro.textContent = '';
+            sucesso.textContent = '';
+
+            try {
+                const response = await fetch(`${API_URL}/cadastro`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senha })
+                });
+
+                const data = await response.json();
+
+                if (data.sucesso) {
+                    sucesso.textContent = '✅ Cadastro realizado! Redirecionando...';
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    erro.textContent = '❌ Erro ao cadastrar';
+                }
+            } catch (err) {
+                erro.textContent = '❌ Erro ao conectar ao servidor';
+                console.log(err);
+            }
+        });
+    </script>
+
+</body>
+</html>
