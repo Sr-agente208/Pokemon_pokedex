@@ -8,7 +8,7 @@ const pool = new Pool({
     ssl: {
         rejectUnauthorized: false
     },
-    connectionTimeoutMillis: 5000, // 5 seconds timeout to quickly switch to fallback
+    connectionTimeoutMillis: 5000, // 5 seconds timeout
     idleTimeoutMillis: 30000
 });
 
@@ -198,11 +198,100 @@ async function initDb() {
         `);
         
         console.log("Database: PostgreSQL tables checked/created successfully! ✅");
+        // Try background sync if any offline data exists
+        await syncOfflineData();
     } catch (err) {
         console.warn("⚠️ Database initialization on PostgreSQL failed. Switching to local JSON database fallback.");
         useFallback = true;
     }
 }
+
+// Synchronization engine to sync offline JSON fallback data to PostgreSQL
+async function syncOfflineData() {
+    try {
+        console.log("Database: Starting synchronization of offline data to PostgreSQL...");
+        
+        // 1. Sync Users
+        const offlineUsers = readFallbackFile("db_fallback_usuarios.json");
+        const userIdMap = {}; // Maps old offline ID to real PostgreSQL ID
+        
+        if (offlineUsers.length > 0) {
+            console.log(`Database: Syncing ${offlineUsers.length} offline users...`);
+            for (const user of offlineUsers) {
+                const checkRes = await pool.query("SELECT id FROM usuarios WHERE email = $1", [user.email]);
+                let realId;
+                if (checkRes.rows.length > 0) {
+                    realId = checkRes.rows[0].id;
+                } else {
+                    const insertRes = await pool.query(
+                        "INSERT INTO usuarios (nome, email, senha, criado_em) VALUES ($1, $2, $3, $4) RETURNING id",
+                        [user.nome, user.email, user.senha, user.criado_em || new Date()]
+                    );
+                    realId = insertRes.rows[0].id;
+                }
+                userIdMap[user.id] = realId;
+            }
+        }
+        
+        // 2. Sync Recados
+        const offlineRecados = readFallbackFile("db_fallback_recados.json");
+        if (offlineRecados.length > 0) {
+            console.log(`Database: Syncing ${offlineRecados.length} offline recados...`);
+            for (const recado of offlineRecados) {
+                await pool.query(
+                    "INSERT INTO recados (nome, mensagem, criado_em) VALUES ($1, $2, $3)",
+                    [recado.nome, recado.mensagem, recado.criado_em || new Date()]
+                );
+            }
+        }
+        
+        // 3. Sync Favorites
+        const offlineFavorites = readFallbackFile("db_fallback_favoritos.json");
+        if (offlineFavorites.length > 0) {
+            console.log(`Database: Syncing ${offlineFavorites.length} offline favorites...`);
+            for (const fav of offlineFavorites) {
+                const realUserId = userIdMap[fav.usuario_id] || null;
+                await pool.query(
+                    "INSERT INTO favoritos (usuario_id, nome, numero, imagem, tipo, criado_em) VALUES ($1, $2, $3, $4, $5, $6)",
+                    [realUserId, fav.nome, fav.numero, fav.imagem, fav.tipo, fav.criado_em || new Date()]
+                );
+            }
+        }
+        
+        // Clear files upon successful synchronization
+        if (offlineUsers.length > 0) writeFallbackFile("db_fallback_usuarios.json", []);
+        if (offlineRecados.length > 0) writeFallbackFile("db_fallback_recados.json", []);
+        if (offlineFavorites.length > 0) writeFallbackFile("db_fallback_favoritos.json", []);
+        
+        console.log("Database: Offline data successfully synchronized to PostgreSQL! 🎉");
+    } catch (err) {
+        console.error("Database: Error during offline synchronization:", err.message);
+    }
+}
+
+// Background heartbeat to detect when PostgreSQL comes online
+setInterval(async () => {
+    if (useFallback) {
+        try {
+            await pool.query("SELECT NOW()");
+            console.log("⚡ PostgreSQL is back online! Switching from fallback mode to database mode...");
+            useFallback = false;
+            await syncOfflineData();
+        } catch (err) {
+            // Still offline
+        }
+    } else {
+        try {
+            const hasUsers = fs.existsSync(getFallbackPath("db_fallback_usuarios.json")) && readFallbackFile("db_fallback_usuarios.json").length > 0;
+            const hasRecados = fs.existsSync(getFallbackPath("db_fallback_recados.json")) && readFallbackFile("db_fallback_recados.json").length > 0;
+            const hasFavorites = fs.existsSync(getFallbackPath("db_fallback_favoritos.json")) && readFallbackFile("db_fallback_favoritos.json").length > 0;
+            
+            if (hasUsers || hasRecados || hasFavorites) {
+                await syncOfflineData();
+            }
+        } catch(e) {}
+    }
+}, 15000); // Check every 15 seconds
 
 // Run the initialization
 initDb();

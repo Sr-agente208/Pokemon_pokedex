@@ -547,7 +547,52 @@ aleatorio();
 
 trocarWallpaper();
 
+sincronizarLocalStorage();
+
 };
+
+
+async function sincronizarLocalStorage() {
+    const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+    if (usuarios.length > 0) {
+        console.log("Sincronizando usuários offline...");
+        for (const u of usuarios) {
+            try {
+                await fetch(getApiUrl("/cadastro"), {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nome: u.nome, email: u.email, senha: u.senha })
+                });
+            } catch(e) {}
+        }
+        localStorage.removeItem("usuarios");
+    }
+
+    const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+    const usuarioRaw = localStorage.getItem("logado");
+    if (favoritos.length > 0 && usuarioRaw === 'true') {
+        const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
+        if (usuarioLogado && usuarioLogado.id) {
+            console.log("Sincronizando favoritos offline...");
+            for (const f of favoritos) {
+                try {
+                    await fetch(getApiUrl("/favoritos"), {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            usuario_id: usuarioLogado.id,
+                            nome: f.nome,
+                            numero: f.numero.toString(),
+                            imagem: f.imagem,
+                            tipo: f.tipo
+                        })
+                    });
+                } catch(e) {}
+            }
+            localStorage.removeItem("favoritos");
+        }
+    }
+}
 
 
 
