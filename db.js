@@ -118,6 +118,23 @@ function executeFallbackQuery(sql, params) {
         writeFallbackFile("db_fallback_favoritos.json", favoritos);
         return { rows: [] };
     }
+
+    if (sqlClean.includes("SELECT * FROM FAVORITOS")) {
+        const favoritos = readFallbackFile("db_fallback_favoritos.json");
+        const usuario_id = params[0];
+        const matches = favoritos.filter(f => f.usuario_id == usuario_id);
+        matches.sort((a, b) => b.id - a.id);
+        return { rows: matches };
+    }
+
+    if (sqlClean.includes("DELETE FROM FAVORITOS")) {
+        let favoritos = readFallbackFile("db_fallback_favoritos.json");
+        const usuario_id = params[0];
+        const numero = params[1];
+        favoritos = favoritos.filter(f => !(f.usuario_id == usuario_id && f.numero == numero));
+        writeFallbackFile("db_fallback_favoritos.json", favoritos);
+        return { rows: [] };
+    }
     
     return { rows: [] };
 }

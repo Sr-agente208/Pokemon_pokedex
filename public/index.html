@@ -849,7 +849,7 @@ audio.play();
 
 // FAVORITO
 
-function favoritarAtual(){
+async function favoritarAtual(){
 
 
 if(!pokemonAtual){
@@ -860,53 +860,80 @@ return;
 
 }
 
+const usuarioLogadoRaw = localStorage.getItem("logado");
+if (!usuarioLogadoRaw) {
+    alert("Você precisa estar logado para favoritar!");
+    return;
+}
 
+let usuario = JSON.parse(usuarioLogadoRaw);
+let usuario_id = usuario.id;
 
-let favoritos =
+try {
+    const response = await fetch("/favoritos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            usuario_id: usuario_id,
+            nome: pokemonAtual.name,
+            numero: pokemonAtual.id.toString(),
+            imagem: pokemonAtual.sprites.other["official-artwork"].front_default,
+            tipo: pokemonAtual.types[0].type.name
+        })
+    });
 
-JSON.parse(
+    const data = await response.json();
+    if (data.sucesso) {
+        alert("⭐ Pokémon salvo nos favoritos do banco! ✅");
+    } else {
+        alert("❌ Erro ao salvar nos favoritos.");
+    }
+} catch(err) {
+    console.error(err);
+    let favoritos =
 
-localStorage.getItem("favoritos")
+    JSON.parse(
 
-)||[];
+    localStorage.getItem("favoritos")
 
-
-
-
-favoritos.push({
-
-
-nome:pokemonAtual.name,
-
-
-numero:pokemonAtual.id,
-
-
-imagem:
-pokemonAtual.sprites.other["official-artwork"].front_default,
-
-
-tipo:
-pokemonAtual.types[0].type.name
-
-
-});
-
-
-
-localStorage.setItem(
-
-"favoritos",
-
-JSON.stringify(favoritos)
-
-);
+    )||[];
 
 
 
-alert("⭐ Pokémon salvo nos favoritos!");
+
+    favoritos.push({
 
 
+    nome:pokemonAtual.name,
+
+
+    numero:pokemonAtual.id,
+
+
+    imagem:
+    pokemonAtual.sprites.other["official-artwork"].front_default,
+
+
+    tipo:
+    pokemonAtual.types[0].type.name
+
+
+    });
+
+
+
+    localStorage.setItem(
+
+    "favoritos",
+
+    JSON.stringify(favoritos)
+
+    );
+
+
+
+    alert("⭐ Pokémon salvo nos favoritos (Offline)!");
+}
 
 }
 
