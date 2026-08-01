@@ -141,6 +141,13 @@
     </div>
 
     <script>
+        function getApiUrl(path) {
+            if (window.location.port === "3000" || window.location.hostname.includes("railway.app")) {
+                return path;
+            }
+            return "http://localhost:3000" + path;
+        }
+
         document.getElementById('formCadastro').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -154,7 +161,7 @@
             sucesso.textContent = '';
 
             try {
-                const response = await fetch('/cadastro', {
+                const response = await fetch(getApiUrl('/cadastro'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome, email, senha })
@@ -173,8 +180,17 @@
             } catch (err) {
                 console.log("Server registration failed, using localStorage fallback:", err);
                 
-                let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-                let existe = usuarios.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+                let usuarios = [];
+                try {
+                    usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+                    if (!Array.isArray(usuarios)) {
+                        usuarios = [];
+                    }
+                } catch(e) {
+                    usuarios = [];
+                }
+
+                let existe = usuarios.find(u => u && u.email && u.email.toLowerCase() === email.toLowerCase());
                 
                 if (existe) {
                     erro.textContent = '❌ Este email já está cadastrado! (Offline)';

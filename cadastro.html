@@ -180,8 +180,17 @@
             } catch (err) {
                 console.log("Server registration failed, using localStorage fallback:", err);
                 
-                let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-                let existe = usuarios.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+                let usuarios = [];
+                try {
+                    usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+                    if (!Array.isArray(usuarios)) {
+                        usuarios = [];
+                    }
+                } catch(e) {
+                    usuarios = [];
+                }
+
+                let existe = usuarios.find(u => u && u.email && u.email.toLowerCase() === email.toLowerCase());
                 
                 if (existe) {
                     erro.textContent = '❌ Este email já está cadastrado! (Offline)';

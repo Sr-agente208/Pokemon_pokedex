@@ -157,7 +157,8 @@
                 const data = await response.json();
 
                 if (data.sucesso) {
-                    localStorage.setItem('logado', JSON.stringify(data.usuario));
+                    localStorage.setItem('logado', 'true');
+                    localStorage.setItem('usuarioLogado', JSON.stringify(data.usuario));
                     window.location.href = 'index.html';
                 } else {
                     erro.textContent = '❌ Email ou senha incorretos';
@@ -165,11 +166,21 @@
             } catch (err) {
                 console.log("Server login failed, using localStorage fallback:", err);
                 
-                let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-                let usuario = usuarios.find(u => u.email && u.email.toLowerCase() === email.toLowerCase() && u.senha === senha);
+                let usuarios = [];
+                try {
+                    usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+                    if (!Array.isArray(usuarios)) {
+                        usuarios = [];
+                    }
+                } catch(e) {
+                    usuarios = [];
+                }
+
+                let usuario = usuarios.find(u => u && u.email && u.email.toLowerCase() === email.toLowerCase() && u.senha === senha);
                 
                 if (usuario) {
-                    localStorage.setItem('logado', JSON.stringify(usuario));
+                    localStorage.setItem('logado', 'true');
+                    localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
                     window.location.href = 'index.html';
                 } else {
                     erro.textContent = '❌ Email ou senha incorretos (Offline)';
