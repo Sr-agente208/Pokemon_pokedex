@@ -636,7 +636,7 @@ await resposta.json();
 
 
 
-mostarPokemon(pokemon);
+mostrarPokemon(pokemon);
 
 
 
@@ -996,77 +996,105 @@ pdf.text(
 
 
 
-pdf.save(`${p.name}.pdf`);
+pdf.text(
+
+"Tipo: "+p.types[0].type.name,
+
+20,
+
+60
+
+);
+
+
+
+pdf.save(
+
+p.name+"-pokedex.pdf"
+
+);
+
+
 
 }
+
+
+
 
 
 
 // WORD
 
-async function baixarWord(){
+function baixarWord(){
 
 
-if(!pokemonAtual){
-
-alert("Pesquise um Pokémon!");
-
-return;
-
-}
+if(!pokemonAtual)return;
 
 
 
-let p = pokemonAtual;
+let p=pokemonAtual;
 
 
 
-const {Document,Packer,Paragraph,HeadingLevel} = window.docx;
+let texto=`
+
+POKÉDEX
+
+Nome: ${p.name}
+
+Número: ${p.id}
+
+Tipo: ${p.types[0].type.name}
+
+Altura: ${p.height/10}m
+
+Peso: ${p.weight/10}kg
+
+`;
 
 
 
-const doc = new Document({
+let arquivo =
+new Blob(
 
-sections: [{
+[texto],
 
-properties: {},
+{type:"application/msword"}
 
-children: [
-
-new Paragraph({
-
-text: p.name.toUpperCase(),
-
-heading: HeadingLevel.HEADING_1,
-}),
-new Paragraph({
-
-text: `Número: #${p.id}`,
-}),
-]
-
-}]
-
-});
+);
 
 
 
-Packer.toBlob(doc).then(blob => {
+let link =
+document.createElement("a");
 
-const url = window.URL.createObjectURL(blob);
 
-const a = document.createElement('a');
 
-a.href = url;
+link.href =
+URL.createObjectURL(arquivo);
 
-a.download = `${p.name}.docx`;
 
-a.click();
 
-window.URL.revokeObjectURL(url);
+link.download =
+p.name+".doc";
 
-});
+
+
+link.click();
+
+
 
 }
+
+
 
 </script>
+
+
+<link rel="stylesheet" href="style.css">
+
+<script src="script.js"></script>
+
+</body>
+
+</html>

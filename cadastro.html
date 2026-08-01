@@ -168,7 +168,7 @@
                         window.location.href = 'login.html';
                     }, 2000);
                 } else {
-                    erro.textContent = '❌ Erro ao cadastrar';
+                    erro.textContent = '❌ ' + (data.detalhe || 'Erro ao cadastrar');
                 }
             } catch (err) {
                 erro.textContent = '❌ Erro ao conectar ao servidor';

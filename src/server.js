@@ -105,7 +105,8 @@ app.post("/recados", async(req,res)=>{
 
     try{
 
-        const {nome,mensagem}=req.body;
+        const nome = req.body.nome || req.body.usuario || "Anônimo";
+        const mensagem = req.body.mensagem || req.body.texto || "";
 
 
         await pool.query(
@@ -178,10 +179,15 @@ app.post("/cadastro", async(req,res)=>{
 
         console.log(err);
 
+        let msg = err.message;
+        if (err.code === '23505') {
+            msg = "Este email já está cadastrado!";
+        }
+
         res.status(500).json({
 
             erro:"Erro no cadastro",
-            detalhe:err.message
+            detalhe:msg
 
         });
 

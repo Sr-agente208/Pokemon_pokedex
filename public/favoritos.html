@@ -1,362 +1,145 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>⭐ Meus Favoritos - Pokédex</title>
-
-<link rel="stylesheet" href="style.css">
-
-
-<style>
-
-
-body{
-
-background:#111;
-
-color:white;
-
-}
-
-
-
-.container{
-
-padding:40px 20px;
-
-text-align:center;
-
-}
-
-
-
-h1{
-
-font-size:40px;
-
-margin-bottom:30px;
-
-}
-
-
-
-button{
-
-padding:12px 20px;
-
-border:none;
-
-border-radius:20px;
-
-background:#ef5350;
-
-color:white;
-
-cursor:pointer;
-
-margin:10px;
-
-}
-
-
-
-button:hover{
-
-transform:scale(1.05);
-
-}
-
-
-
-#listaFavoritos{
-
-display:flex;
-
-justify-content:center;
-
-flex-wrap:wrap;
-
-gap:25px;
-
-}
-
-
-
-.pokemon-card{
-
-
-width:250px;
-
-background:rgba(255,255,255,.15);
-
-backdrop-filter:blur(10px);
-
-border-radius:20px;
-
-padding:20px;
-
-box-shadow:0 0 20px black;
-
-
-}
-
-
-
-.pokemon-card img{
-
-width:160px;
-
-}
-
-
-
-.tipo{
-
-
-display:inline-block;
-
-padding:8px 15px;
-
-border-radius:20px;
-
-background:#1976d2;
-
-margin:10px;
-
-
-}
-
-
-.remover{
-
-background:#d32f2f;
-
-}
-
-
-
-</style>
-
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⭐ Favoritos - Pokéé Pesquisa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #111;
+            color: white;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 36px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: #ef5350;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card img {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+        }
+
+        .vazio {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #aaa;
+        }
+    </style>
 </head>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <body>
 
-
-
-<div class="container">
-
-
-<h1>
-
-⭐ Meus Favoritos
-
-</h1>
-
-
-
-<button onclick="voltar()">
-
-⬅️ Voltar
-
-</button>
-
-
-
-<div id="listaFavoritos">
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-<script>
-
-
-function chaveFavoritos(){
-
-
-    let usuario =
-    JSON.parse(
-        localStorage.getItem("usuarioLogado")
-    );
-
-
-    if(!usuario){
-
-        return "favoritos";
-
-    }
-
-
-    return "favoritos_" + usuario.email;
-
-
-}
-
-
-
-
-function carregarFavoritos(){
-
-
-    let lista =
-    document.getElementById(
-        "listaFavoritos"
-    );
-
-
-
-    let favoritos =
-    JSON.parse(
-
-        localStorage.getItem(
-            chaveFavoritos()
-        )
-
-    ) || [];
-
-
-
-    lista.innerHTML="";
-
-
-
-    if(favoritos.length === 0){
-
-
-        lista.innerHTML =
-        "<h2>😢 Você ainda não tem favoritos</h2>";
-
-        return;
-
-    }
-
-
-
-
-    favoritos.forEach(
-    (pokemon,index)=>{
-
-
-        lista.innerHTML += `
-
-
-        <div class="pokemon-card">
-
-
-            <h2>
-            ${pokemon.nome.toUpperCase()}
-            </h2>
-
-
-            <img 
-            src="${pokemon.imagem}"
-            >
-
-
-
-            <p>
-            🔢 Número: #${pokemon.numero}
-            </p>
-
-
-
-            <p>
-            🌈 Tipo: ${pokemon.tipo}
-            </p>
-
-
-
-            <button 
-            class="remover"
-            onclick="removerFavorito(${index})">
-
-            🗑 Remover
-
-            </button>
-
-
+    <main>
+        <div class="header">
+            <h1>⭐ Meus Favoritos</h1>
+            <button onclick="window.location.href='index.html'">← Voltar</button>
         </div>
 
+        <div class="grid" id="favoritos">
+            <div class="vazio">Nenhum favorito ainda. Pesquise um Pokémon e adicione aos favoritos!</div>
+        </div>
+    </main>
 
-        `;
+    <script>
+        window.onload = function () {
+            if (!localStorage.getItem("logado")) {
+                window.location.href = "login.html";
+                return;
+            }
 
+            carregarFavoritos();
+        };
 
-    });
+        function carregarFavoritos() {
+            const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+            const container = document.getElementById("favoritos");
 
+            if (favoritos.length === 0) {
+                container.innerHTML = '<div class="vazio">Nenhum favorito ainda. Pesquise um Pokémon e adicione aos favoritos!</div>';
+                return;
+            }
 
+            container.innerHTML = favoritos.map((fav, index) => `
+                <div class="card">
+                    <img src="${fav.imagem}" alt="${fav.nome}">
+                    <h3>${fav.nome.toUpperCase()}</h3>
+                    <p>#${fav.numero}</p>
+                    <p>Tipo: ${fav.tipo}</p>
+                    <button onclick="remover(${index})">❌ Remover</button>
+                </div>
+            `).join('');
+        }
 
-}
-
-
-
-
-
-function removerFavorito(index){
-
-
-    let favoritos =
-    JSON.parse(
-
-        localStorage.getItem(
-            chaveFavoritos()
-        )
-
-    ) || [];
-
-
-
-    favoritos.splice(index,1);
-
-
-
-    localStorage.setItem(
-
-        chaveFavoritos(),
-
-        JSON.stringify(favoritos)
-
-    );
-
-
-
-    carregarFavoritos();
-
-
-}
-
-
-
-
-
-function voltar(){
-
-    window.location.href="index.html";
-
-}
-
-
-
-
-carregarFavoritos();
-
-
-</script>
-
+        function remover(index) {
+            let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+            favoritos.splice(index, 1);
+            localStorage.setItem("favoritos", JSON.stringify(favoritos));
+            carregarFavoritos();
+        }
+    </script>
 
 </body>
-
 </html>
