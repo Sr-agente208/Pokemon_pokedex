@@ -138,6 +138,8 @@
             const senha = document.getElementById('senha').value;
             const erro = document.getElementById('erro');
 
+            erro.textContent = '';
+
             try {
                 const response = await fetch('/login', {
                     method: 'POST',
@@ -154,8 +156,17 @@
                     erro.textContent = '❌ Email ou senha incorretos';
                 }
             } catch (err) {
-                erro.textContent = '❌ Erro ao conectar ao servidor';
-                console.log(err);
+                console.log("Server login failed, using localStorage fallback:", err);
+                
+                let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+                let usuario = usuarios.find(u => u.email && u.email.toLowerCase() === email.toLowerCase() && u.senha === senha);
+                
+                if (usuario) {
+                    localStorage.setItem('logado', JSON.stringify(usuario));
+                    window.location.href = 'index.html';
+                } else {
+                    erro.textContent = '❌ Email ou senha incorretos (Offline)';
+                }
             }
         });
     </script>
