@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const pool = require("./db");
+const pool = require("./config/database");
 
 require("dotenv").config();
 
@@ -16,12 +16,10 @@ app.use(express.json());
 // =====================
 
 // arquivos da raiz (index.html)
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // arquivos da pasta public
-app.use(express.static(path.join(__dirname, "public")));
-app.use(express.static(__dirname));
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "../public")));
 
 
 // =====================
@@ -29,11 +27,9 @@ app.use(express.static("public"));
 // =====================
 
 app.get("/", (req, res) => {
-
     res.sendFile(
-        path.join(__dirname, "index.html")
+        path.join(__dirname, "../public/index.html")
     );
-
 });
 
 

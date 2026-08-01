@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⭐ Favoritos - Poké Pesquisa</title>
+    <title>⭐ Favoritos - Pokéé Pesquisa</title>
     <style>
         * {
             margin: 0;
@@ -104,7 +104,12 @@
     </main>
 
     <script>
-        const API_URL = 'https://pokemonpokedex-production-0fc5.up.railway.app';
+        function getApiUrl(path) {
+            if (window.location.port === "3000" || window.location.hostname.includes("railway.app")) {
+                return path;
+            }
+            return "http://localhost:3000" + path;
+        }
 
         window.onload = function () {
             if (!localStorage.getItem("logado")) {
@@ -115,27 +120,84 @@
             carregarFavoritos();
         };
 
-        function carregarFavoritos() {
-            const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+        async function carregarFavoritos() {
             const container = document.getElementById("favoritos");
+            const usuarioRaw = localStorage.getItem("logado");
+            if (!usuarioRaw) return;
 
-            if (favoritos.length === 0) {
-                container.innerHTML = '<div class="vazio">Nenhum favorito ainda. Pesquise um Pokémon e adicione aos favoritos!</div>';
+            let usuario;
+            try {
+                usuario = JSON.parse(usuarioRaw);
+            } catch(e) {
                 return;
             }
+            const usuario_id = usuario.id;
 
-            container.innerHTML = favoritos.map((fav, index) => `
-                <div class="card">
-                    <img src="${fav.imagem}" alt="${fav.nome}">
-                    <h3>${fav.nome.toUpperCase()}</h3>
-                    <p>#${fav.numero}</p>
-                    <p>Tipo: ${fav.tipo}</p>
-                    <button onclick="remover(${index})">❌ Remover</button>
-                </div>
-            `).join('');
+            try {
+                const response = await fetch(getApiUrl(`/favoritos/${usuario_id}`));
+                if (!response.ok) throw new Error("Erro no servidor");
+                const favoritos = await response.json();
+
+                if (favoritos.length === 0) {
+                    container.innerHTML = '<div class="vazio">Nenhum favorito ainda. Pesquise um Pokémon e adicione aos favoritos!</div>';
+                    return;
+                }
+
+                container.innerHTML = favoritos.map((fav) => `
+                    <div class="card">
+                        <img src="${fav.imagem}" alt="${fav.nome}">
+                        <h3>${fav.nome.toUpperCase()}</h3>
+                        <p>#${fav.numero}</p>
+                        <p>Tipo: ${fav.tipo}</p>
+                        <button onclick="remover('${fav.numero}')">❌ Remover</button>
+                    </div>
+                `).join('');
+            } catch(err) {
+                console.log("Using offline favorites fallback:", err);
+                const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+                if (favoritos.length === 0) {
+                    container.innerHTML = '<div class="vazio">Nenhum favorito ainda. Pesquise um Pokémon e adicione aos favoritos!</div>';
+                    return;
+                }
+
+                container.innerHTML = favoritos.map((fav, index) => `
+                    <div class="card">
+                        <img src="${fav.imagem}" alt="${fav.nome}">
+                        <h3>${fav.nome.toUpperCase()}</h3>
+                        <p>#${fav.numero}</p>
+                        <p>Tipo: ${fav.tipo}</p>
+                        <button onclick="removerOffline(${index})">❌ Remover</button>
+                    </div>
+                `).join('');
+            }
         }
 
-        function remover(index) {
+        async function remover(numero) {
+            const usuarioRaw = localStorage.getItem("logado");
+            if (!usuarioRaw) return;
+
+            let usuario;
+            try {
+                usuario = JSON.parse(usuarioRaw);
+            } catch(e) {
+                return;
+            }
+            const usuario_id = usuario.id;
+
+            try {
+                const response = await fetch(getApiUrl(`/favoritos/${usuario_id}/${numero}`), {
+                    method: "DELETE"
+                });
+                const data = await response.json();
+                if (data.sucesso) {
+                    carregarFavoritos();
+                }
+            } catch(err) {
+                console.error("Erro ao deletar do banco:", err);
+            }
+        }
+
+        function removerOffline(index) {
             let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
             favoritos.splice(index, 1);
             localStorage.setItem("favoritos", JSON.stringify(favoritos));
