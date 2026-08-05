@@ -125,10 +125,16 @@
             const usuarioRaw = localStorage.getItem("logado");
             if (!usuarioRaw) return;
 
-            let usuario;
+            let usuario = null;
             try {
                 usuario = JSON.parse(usuarioRaw);
-            } catch(e) {
+                if (usuario === true || typeof usuario !== 'object') {
+                    usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+                }
+            } catch(e) {}
+
+            if (!usuario || !usuario.id) {
+                window.location.href = "login.html";
                 return;
             }
             const usuario_id = usuario.id;
@@ -176,10 +182,16 @@
             const usuarioRaw = localStorage.getItem("logado");
             if (!usuarioRaw) return;
 
-            let usuario;
+            let usuario = null;
             try {
                 usuario = JSON.parse(usuarioRaw);
-            } catch(e) {
+                if (usuario === true || typeof usuario !== 'object') {
+                    usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+                }
+            } catch(e) {}
+
+            if (!usuario || !usuario.id) {
+                window.location.href = "login.html";
                 return;
             }
             const usuario_id = usuario.id;

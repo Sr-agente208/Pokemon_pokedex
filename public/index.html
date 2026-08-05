@@ -570,8 +570,11 @@ async function sincronizarLocalStorage() {
 
     const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
     const usuarioRaw = localStorage.getItem("logado");
-    if (favoritos.length > 0 && usuarioRaw === 'true') {
-        const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
+    if (favoritos.length > 0 && usuarioRaw) {
+        let usuarioLogado = null;
+        try {
+            usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || (usuarioRaw !== 'true' ? usuarioRaw : null));
+        } catch(e) {}
         if (usuarioLogado && usuarioLogado.id) {
             console.log("Sincronizando favoritos offline...");
             for (const f of favoritos) {
@@ -603,6 +606,7 @@ async function sincronizarLocalStorage() {
 function sair(){
 
 localStorage.removeItem("logado");
+localStorage.removeItem("usuarioLogado");
 
 window.location.href="login.html";
 
@@ -917,7 +921,18 @@ if (!usuarioLogadoRaw) {
     return;
 }
 
-let usuario = JSON.parse(usuarioLogadoRaw);
+let usuario = null;
+try {
+    usuario = JSON.parse(usuarioLogadoRaw);
+    if (usuario === true || typeof usuario !== 'object') {
+        usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+    }
+} catch(e) {}
+
+if (!usuario || !usuario.id) {
+    alert("Erro ao carregar dados do usuário. Por favor, faça login novamente.");
+    return;
+}
 let usuario_id = usuario.id;
 
 try {
