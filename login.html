@@ -157,7 +157,7 @@
                 const data = await response.json();
 
                 if (data.sucesso) {
-                    localStorage.setItem('logado', 'true');
+                    localStorage.setItem('logado', JSON.stringify(data.usuario));
                     localStorage.setItem('usuarioLogado', JSON.stringify(data.usuario));
                     window.location.href = 'index.html';
                 } else {
@@ -179,7 +179,7 @@
                 let usuario = usuarios.find(u => u && u.email && u.email.toLowerCase() === email.toLowerCase() && u.senha === senha);
                 
                 if (usuario) {
-                    localStorage.setItem('logado', 'true');
+                    localStorage.setItem('logado', JSON.stringify(usuario));
                     localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
                     window.location.href = 'index.html';
                 } else {
