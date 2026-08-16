@@ -1,9 +1,11 @@
 /* Compatibilidade máxima: sem fetch, async/await ou sintaxe ES6. */
 (function () {
+  // GitHub Pages não possui API própria. Use o backend Railway quando o site estiver publicado lá.
+  window.API_BASE = location.hostname.indexOf("github.io") >= 0 ? "https://pokemonpokedex-production-0fc5.up.railway.app" : "";
   function json(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch (e) { return fallback; } }
   window.usuarioAtual = function () { return json("usuarioLogado", null); };
   window.api = function (method, url, body, ok, fail) {
-    var xhr = new XMLHttpRequest(), atual=usuarioAtual(); xhr.open(method, url, true); xhr.timeout = 4500; xhr.setRequestHeader("Content-Type", "application/json"); if(atual && atual.token) xhr.setRequestHeader("Authorization", "Bearer "+atual.token);
+    var xhr = new XMLHttpRequest(), atual=usuarioAtual(); xhr.open(method, window.API_BASE + url, true); xhr.timeout = 4500; xhr.setRequestHeader("Content-Type", "application/json"); if(atual && atual.token) xhr.setRequestHeader("Authorization", "Bearer "+atual.token);
     xhr.onreadystatechange = function () { if (xhr.readyState !== 4) return; var data={}; try { data=JSON.parse(xhr.responseText); } catch(e) {} if(xhr.status>=200 && xhr.status<300) { if(ok)ok(data); } else if(fail)fail(data); };
     xhr.ontimeout = xhr.onerror = function () { if(fail)fail({erro:"Sem conexão com o servidor."}); };
     xhr.send(body ? JSON.stringify(body) : null);
