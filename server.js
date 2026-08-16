@@ -1,27 +1,23 @@
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const db = require("./db");
+const express=require("express"),cors=require("cors"),path=require("path"),crypto=require("crypto"),db=require("./db");
 require("dotenv").config();
-const app = express();
-app.use(cors());
-app.use(express.json({ limit: "200kb" }));
-app.use(express.static(path.join(__dirname, "public")));
-app.use(express.static(__dirname));
-const cargo = body => (body && (body.cargo || (body.usuario && body.usuario.cargo))) || "Usuário";
-const isStaff = body => ["ADM", "Assistente"].includes(cargo(body));
-const isAdmin = body => cargo(body) === "ADM";
-function error(res, err, fallback) { console.error(err.message); res.status(err.code === "23505" ? 409 : (err.status || 500)).json({ erro: err.code === "23505" ? "Este email já está cadastrado!" : (err.message || fallback) }); }
-app.get("/teste-banco", (req,res) => res.json({ conectado: db.isOnline(), modo: db.isOnline() ? "postgres" : "fallback-json" }));
-app.get("/usuarios", async (req,res) => { try { res.json(await db.usuarios()); } catch(e) { error(res,e,"Erro ao listar usuários."); } });
-app.post("/cadastro", async (req,res) => { try { res.status(201).json({ sucesso:true, usuario:await db.createUsuario(req.body) }); } catch(e) { error(res,e,"Erro no cadastro."); } });
-app.post("/login", async (req,res) => { try { const usuario=await db.login(req.body.email,req.body.senha); res.json(usuario ? {sucesso:true,usuario} : {sucesso:false,erro:"E-mail ou senha incorretos."}); } catch(e) { error(res,e,"Erro no login."); } });
-app.delete("/usuarios/:id", async (req,res) => { try { if(!isAdmin(req.body)) return res.status(403).json({erro:"Apenas ADM pode excluir contas."}); res.json({sucesso:!!(await db.deleteUsuario(req.params.id))}); } catch(e) { error(res,e,"Erro ao excluir usuário."); } });
-app.get("/recados", async (req,res) => { try { res.json(await db.recados()); } catch(e) { error(res,e,"Erro ao carregar recados."); } });
-app.post("/recados", async (req,res) => { try { res.status(201).json({sucesso:true,recado:await db.createRecado(req.body)}); } catch(e) { error(res,e,"Erro ao salvar recado."); } });
-app.delete("/recados/:id", async (req,res) => { try { if(!isStaff(req.body)) return res.status(403).json({erro:"Sem permissão para excluir recados."}); res.json({sucesso:!!(await db.deleteRecado(req.params.id))}); } catch(e) { error(res,e,"Erro ao excluir recado."); } });
-app.get("/favoritos/:usuario_id", async (req,res) => { try { res.json(await db.favoritos(req.params.usuario_id)); } catch(e) { error(res,e,"Erro ao carregar favoritos."); } });
-app.post("/favoritos", async (req,res) => { try { res.status(201).json({sucesso:true,favorito:await db.createFavorito(req.body)}); } catch(e) { error(res,e,"Erro ao salvar favorito."); } });
-app.delete("/favoritos/:usuario_id/:id", async (req,res) => { try { res.json({sucesso:!!(await db.deleteFavorito(req.params.usuario_id,req.params.id))}); } catch(e) { error(res,e,"Erro ao excluir favorito."); } });
-app.get("/", (req,res) => res.sendFile(path.join(__dirname,"public","index.html")));
-const port=process.env.PORT||3000; app.listen(port,"0.0.0.0",()=>console.log("Servidor rodando na porta "+port));
+const app=express(), sessions=new Map(), codes=new Map();
+app.use(cors());app.use(express.json({limit:"200kb"}));app.use(express.static(path.join(__dirname,"public")));app.use(express.static(__dirname));
+function error(res,e,fallback){console.error(e.message);res.status(e.code==="23505"?409:(e.status||500)).json({erro:e.code==="23505"?"Este email já está cadastrado!":(e.message||fallback)});}
+function auth(req,res,next){const token=(req.headers.authorization||"").replace("Bearer ","");const session=sessions.get(token);if(!session||session.expires<Date.now())return res.status(401).json({erro:"Faça login novamente para continuar."});req.user=session.user;next();}
+function admin(req,res,next){if(req.user.cargo!=="ADM")return res.status(403).json({erro:"Apenas administradores podem fazer isso."});next();}
+function validCode(cargo,code){if(!code)return false;const env=cargo==="ADM"?process.env.ADMIN_VERIFICATION_CODE:process.env.ASSISTANT_VERIFICATION_CODE;if(env&&Buffer.byteLength(code)===Buffer.byteLength(env)&&crypto.timingSafeEqual(Buffer.from(code),Buffer.from(env)))return true;const saved=codes.get(code);if(saved&&saved.cargo===cargo&&saved.expires>Date.now()){codes.delete(code);return true;}return false;}
+function requestedCargo(body){const wanted=body.cargo||"Usuário";if(wanted==="Usuário")return "Usuário";if(!["ADM","Assistente"].includes(wanted))return "Usuário";if(!validCode(wanted,String(body.codigo_verificacao||"")))throw Object.assign(new Error("Código de verificação inválido ou expirado."),{status:403});return wanted;}
+app.get("/teste-banco",(req,res)=>res.json({conectado:db.isOnline(),modo:db.isOnline()?"postgres":"fallback-json"}));
+app.post("/cadastro",async(req,res)=>{try{const cargo=requestedCargo(req.body);const usuario=await db.createUsuario({...req.body,cargo});res.status(201).json({sucesso:true,usuario});}catch(e){error(res,e,"Erro no cadastro.");}});
+app.post("/login",async(req,res)=>{try{const usuario=await db.login(req.body.email,req.body.senha);if(!usuario)return res.json({sucesso:false,erro:"E-mail ou senha incorretos."});const token=crypto.randomBytes(32).toString("hex");sessions.set(token,{user:usuario,expires:Date.now()+1000*60*60*24*7});res.json({sucesso:true,usuario,token});}catch(e){error(res,e,"Erro no login.");}});
+app.get("/usuarios",auth,admin,async(req,res)=>{try{res.json(await db.usuarios());}catch(e){error(res,e,"Erro ao listar usuários.");}});
+app.delete("/usuarios/:id",auth,admin,async(req,res)=>{try{res.json({sucesso:!!(await db.deleteUsuario(req.params.id))});}catch(e){error(res,e,"Erro ao excluir usuário.");}});
+app.post("/verificacao/gerar",auth,admin,(req,res)=>{const cargo=req.body.cargo==="ADM"?"ADM":"Assistente",code=crypto.randomBytes(5).toString("hex").toUpperCase();codes.set(code,{cargo,expires:Date.now()+1000*60*30});res.json({codigo:code,cargo,expira_em:"30 minutos"});});
+app.get("/recados",async(req,res)=>{try{res.json(await db.recados());}catch(e){error(res,e,"Erro ao carregar recados.");}});
+app.post("/recados",auth,async(req,res)=>{try{res.status(201).json({sucesso:true,recado:await db.createRecado({nome:req.user.nome,mensagem:req.body.mensagem||req.body.texto,cargo:req.user.cargo})});}catch(e){error(res,e,"Erro ao salvar recado.");}});
+app.delete("/recados/:id",auth,async(req,res)=>{try{if(!["ADM","Assistente"].includes(req.user.cargo))return res.status(403).json({erro:"Sem permissão para excluir recados."});res.json({sucesso:!!(await db.deleteRecado(req.params.id))});}catch(e){error(res,e,"Erro ao excluir recado.");}});
+app.get("/favoritos/:usuario_id",auth,async(req,res)=>{try{if(String(req.user.id)!==String(req.params.usuario_id))return res.status(403).json({erro:"Sem permissão."});res.json(await db.favoritos(req.params.usuario_id));}catch(e){error(res,e,"Erro ao carregar favoritos.");}});
+app.post("/favoritos",auth,async(req,res)=>{try{res.status(201).json({sucesso:true,favorito:await db.createFavorito({...req.body,usuario_id:req.user.id})});}catch(e){error(res,e,"Erro ao salvar favorito.");}});
+app.delete("/favoritos/:usuario_id/:id",auth,async(req,res)=>{try{if(String(req.user.id)!==String(req.params.usuario_id))return res.status(403).json({erro:"Sem permissão."});res.json({sucesso:!!(await db.deleteFavorito(req.params.usuario_id,req.params.id))});}catch(e){error(res,e,"Erro ao excluir favorito.");}});
+app.get("/",(req,res)=>res.sendFile(path.join(__dirname,"public","index.html")));
+const port=process.env.PORT||3000;app.listen(port,"0.0.0.0",()=>console.log("Servidor rodando na porta "+port));
