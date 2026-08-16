@@ -5,6 +5,22 @@
   function json(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch (e) { return fallback; } }
   window.usuarioAtual = function () { return json("usuarioLogado", null); };
   window.api = function (method, url, body, ok, fail) {
+    /* Supabase: autenticação e banco sem Railway. */
+    if (window.supabaseClient) {
+      var sb=window.supabaseClient, done=function(result){ if(result.error){if(fail)fail({erro:result.error.message});}else if(ok)ok(result.data); };
+      if(method==='POST' && url==='/cadastro') return sb.auth.signUp({email:body.email,password:body.senha,options:{data:{nome:body.nome,cargo:body.cargo,codigo_verificacao:body.codigo_verificacao}}}).then(function(r){if(r.error){return done(r);}done({data:{sucesso:true,usuario:{id:r.data.user.id,nome:body.nome,email:body.email,cargo:'Usuário'}}});});
+      if(method==='POST' && url==='/login') return sb.auth.signInWithPassword({email:body.email,password:body.senha}).then(function(r){if(r.error)return done(r);sb.from('profiles').select('*').eq('id',r.data.user.id).single().then(function(p){if(p.error)return done(p);done({data:{sucesso:true,usuario:{id:p.data.id,nome:p.data.nome,email:p.data.email,cargo:p.data.cargo,token:r.data.session.access_token}}});});});
+      if(method==='GET' && url==='/recados') return sb.from('recados').select('*').order('id',{ascending:false}).then(done);
+      if(method==='POST' && url==='/recados') return sb.auth.getUser().then(function(r){if(r.error)return done(r);sb.from('recados').insert({user_id:r.data.user.id,mensagem:body.mensagem||body.texto}).select().single().then(done);});
+      if(method==='DELETE' && url.indexOf('/recados/')===0) return sb.from('recados').delete().eq('id',url.split('/').pop()).then(function(r){done({data:{sucesso:!r.error},error:r.error});});
+      if(method==='GET' && url==='/usuarios') return sb.from('profiles').select('id,nome,email,cargo').eq('ativo',true).order('created_at',{ascending:false}).then(done);
+      if(method==='DELETE' && url.indexOf('/usuarios/')===0) return sb.from('profiles').update({ativo:false}).eq('id',url.split('/').pop()).then(function(r){done({data:{sucesso:!r.error},error:r.error});});
+      if(method==='GET' && url.indexOf('/favoritos/')===0) return sb.from('favoritos').select('*').eq('usuario_id',url.split('/').pop()).order('id',{ascending:false}).then(done);
+      if(method==='POST' && url==='/favoritos') return sb.from('favoritos').insert({usuario_id:body.usuario_id,nome:body.nome,numero:body.numero,imagem:body.imagem,tipo:body.tipo}).select().single().then(done);
+      if(method==='DELETE' && url.indexOf('/favoritos/')===0){var bits=url.split('/');return sb.from('favoritos').delete().eq('id',bits[3]).eq('usuario_id',bits[2]).then(function(r){done({data:{sucesso:!r.error},error:r.error});});}
+      if(method==='POST' && url==='/verificacao/gerar') return sb.auth.getUser().then(function(u){if(u.error)return done(u);sb.auth.signInWithPassword({email:u.data.user.email,password:body.senha}).then(function(a){if(a.error)return done(a);sb.rpc('generate_verification_code',{requested_cargo:body.cargo}).then(done);});});
+      return fail && fail({erro:'Operação não disponível.'});
+    }
     var xhr = new XMLHttpRequest(), atual=usuarioAtual(); xhr.open(method, window.API_BASE + url, true); xhr.timeout = 4500; xhr.setRequestHeader("Content-Type", "application/json"); if(atual && atual.token) xhr.setRequestHeader("Authorization", "Bearer "+atual.token);
     xhr.onreadystatechange = function () { if (xhr.readyState !== 4) return; var data={}; try { data=JSON.parse(xhr.responseText); } catch(e) {} if(xhr.status>=200 && xhr.status<300) { if(ok)ok(data); } else if(fail)fail(data); };
     xhr.ontimeout = xhr.onerror = function () { if(fail)fail({erro:"Sem conexão com o servidor."}); };
@@ -17,7 +33,7 @@
     if(!found) users.push(user);
     localStorage.setItem("usuarios", JSON.stringify(users));
   }
-  window.sincronizarContasLocais = function () { var users=localUsers(), i; for(i=0;i<users.length;i++) api("POST","/cadastro",users[i],function(){},function(){}); };
+  window.sincronizarContasLocais = function () { if(window.supabaseClient) return; var users=localUsers(), i; for(i=0;i<users.length;i++) api("POST","/cadastro",users[i],function(){},function(){}); };
   window.criarConta = function (event) {
     if(event && event.preventDefault) event.preventDefault();
     var user={nome:document.getElementById("nome").value.replace(/^\s+|\s+$/g,""),email:document.getElementById("email").value.replace(/^\s+|\s+$/g,""),senha:document.getElementById("senha").value,cargo:document.getElementById("cargo").value,codigo_verificacao:(document.getElementById("codigo_verificacao")||{value:""}).value};
