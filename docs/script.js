@@ -9,14 +9,24 @@
     xhr.send(body ? JSON.stringify(body) : null);
   };
   function localUsers(){ return json("usuarios", []); }
+  function salvarUsuarioLocal(user) {
+    var users=localUsers(), i, found=false;
+    for(i=0;i<users.length;i++) { if(users[i].email===user.email) { users[i]=user; found=true; break; } }
+    if(!found) users.push(user);
+    localStorage.setItem("usuarios", JSON.stringify(users));
+  }
   window.sincronizarContasLocais = function () { var users=localUsers(), i; for(i=0;i<users.length;i++) api("POST","/cadastro",users[i],function(){},function(){}); };
   window.criarConta = function (event) {
     if(event && event.preventDefault) event.preventDefault();
     var user={nome:document.getElementById("nome").value.replace(/^\s+|\s+$/g,""),email:document.getElementById("email").value.replace(/^\s+|\s+$/g,""),senha:document.getElementById("senha").value,cargo:document.getElementById("cargo").value};
     if(!user.nome||!user.email||!user.senha){ alert("Preencha todos os campos!"); return false; }
-    api("POST","/cadastro",user,function(){ alert("✅ Conta criada com sucesso!"); window.location.href="login.html"; },function(data){
-      if(data && data.erro && data.erro !== "Sem conexão com o servidor."){ alert(data.erro); return; }
-      var users=localUsers(),i; for(i=0;i<users.length;i++)if(users[i].email===user.email){alert("Este email já está cadastrado!");return false;} user.id=Date.now();users.push(user);localStorage.setItem("usuarios",JSON.stringify(users));alert("💾 Sem conexão: conta salva neste aparelho.");window.location.href="login.html";
+    var existentes=localUsers(), i;
+    for(i=0;i<existentes.length;i++) if(existentes[i].email===user.email){ alert("Este email já está cadastrado neste dispositivo!"); return false; }
+    // Salva antes da rede: a conta continua disponível mesmo offline.
+    user.id=Date.now(); salvarUsuarioLocal(user);
+    api("POST","/cadastro",user,function(data){ if(data.usuario) salvarUsuarioLocal({id:data.usuario.id,nome:user.nome,email:user.email,senha:user.senha,cargo:user.cargo}); alert("✅ Conta criada e sincronizada!"); window.location.href="login.html"; },function(data){
+      if(data && data.erro && data.erro !== "Sem conexão com o servidor."){ alert(data.erro+" A conta ficou salva neste dispositivo."); return; }
+      alert("💾 Sem conexão: conta salva neste aparelho."); window.location.href="login.html";
     }); return false;
   };
   window.login = function (event) {
