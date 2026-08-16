@@ -68,7 +68,7 @@ create trigger before_recado_insert before insert on public.recados for each row
 create or replace function public.generate_verification_code(requested_cargo text)
 returns table(codigo text, cargo text, expira_em text) language plpgsql security definer set search_path = public as $$
 declare generated text; begin
-  if (select cargo from profiles where id=auth.uid() and ativo=true) <> 'ADM' then raise exception 'Apenas ADM pode gerar códigos'; end if;
+  if (select p.cargo from profiles p where p.id=auth.uid() and p.ativo=true) <> 'ADM' then raise exception 'Apenas ADM pode gerar códigos'; end if;
   if requested_cargo not in ('ADM','Assistente') then raise exception 'Cargo inválido'; end if;
   generated := upper(substr(replace(gen_random_uuid()::text,'-',''),1,10));
   insert into verification_codes(code,cargo,created_by,expires_at) values(generated,requested_cargo,auth.uid(),now()+interval '30 minutes');
