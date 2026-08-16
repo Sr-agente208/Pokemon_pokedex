@@ -4,9 +4,9 @@ const { Pool } = require("pg");
 require("dotenv").config();
 
 const files = {
-  usuarios: path.join(__dirname, "db_fallback_usuarios.json"),
-  recados: path.join(__dirname, "db_fallback_recados.json"),
-  favoritos: path.join(__dirname, "db_fallback_favoritos.json")
+  usuarios: path.join(__dirname, "data", "usuarios.json"),
+  recados: path.join(__dirname, "data", "recados.json"),
+  favoritos: path.join(__dirname, "data", "favoritos.json")
 };
 let pool = null;
 let online = false;
@@ -28,7 +28,8 @@ async function sync() {
   for (const user of read("usuarios")) await pool.query("INSERT INTO usuarios(nome,email,senha,cargo) VALUES($1,$2,$3,$4) ON CONFLICT(email) DO NOTHING", [user.nome, user.email, user.senha, normalizeCargo(user.cargo)]);
   for (const note of read("recados")) await pool.query("INSERT INTO recados(nome,mensagem,cargo) VALUES($1,$2,$3)", [note.nome, note.mensagem, normalizeCargo(note.cargo)]);
   for (const fav of read("favoritos")) await pool.query("INSERT INTO favoritos(usuario_id,nome,numero,imagem,tipo) VALUES($1,$2,$3,$4,$5) ON CONFLICT(usuario_id,numero) DO NOTHING", [fav.usuario_id, fav.nome, fav.numero, fav.imagem || "", fav.tipo || ""]);
-  Object.keys(files).forEach(name => write(name, []));
+  // Os JSONs em data/ são versionados como fonte inicial. Não os apagamos:
+  // um processo em execução não consegue criar um commit no Git por conta própria.
 }
 async function connect() {
   if (connecting || !process.env.DATABASE_URL) return;
