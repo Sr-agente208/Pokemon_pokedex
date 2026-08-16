@@ -35,6 +35,15 @@
     api("POST","/login",{email:email,senha:senha},function(data){ if(data.sucesso){localStorage.setItem("logado","true");localStorage.setItem("usuarioLogado",JSON.stringify(data.usuario));window.location.href="index.html";}else alert(data.erro||"E-mail ou senha incorretos."); },function(){ var users=localUsers(),i;for(i=0;i<users.length;i++)if(users[i].email===email&&users[i].senha===senha){localStorage.setItem("logado","true");localStorage.setItem("usuarioLogado",JSON.stringify(users[i]));window.location.href="index.html";return;}alert("Não foi possível entrar. Confira a conexão e os dados."); }); return false;
   };
   window.sair=function(){localStorage.removeItem("logado");localStorage.removeItem("usuarioLogado");window.location.href="login.html";};
+  window.limparDadosDispositivo=function(){
+    if(!window.confirm("Isso vai apagar as contas, sessão, favoritos e recados salvos somente neste dispositivo. Deseja continuar?")) return;
+    var keys=["usuarios","logado","usuarioLogado","recadosOffline","favoritos","favoritos_anonimo"], i, key;
+    for(i=0;i<keys.length;i++) localStorage.removeItem(keys[i]);
+    // Remove também favoritos associados a contas antigas deste aparelho.
+    for(i=localStorage.length-1;i>=0;i--){ key=localStorage.key(i); if(key && key.indexOf("favoritos_")===0) localStorage.removeItem(key); }
+    alert("✅ Dados deste dispositivo foram limpos. Agora crie uma conta ou faça login novamente.");
+    window.location.href="cadastro.html";
+  };
   window.chaveFavoritos=function(){var u=usuarioAtual();return "favoritos_"+(u ? (u.id||u.email) : "anonimo");};
   window.favoritarPokemon=function(p){var u=usuarioAtual(), list=json(chaveFavoritos(),[]), item={nome:p.name,numero:p.id,imagem:p.sprites.other["official-artwork"].front_default,tipo:p.types.map(function(t){return t.type.name;}).join(", ")},i;for(i=0;i<list.length;i++)if(String(list[i].numero)===String(item.numero)){alert("Esse Pokémon já está nos favoritos!");return;}list.push(item);localStorage.setItem(chaveFavoritos(),JSON.stringify(list));if(u&&u.id)api("POST","/favoritos",{usuario_id:u.id,nome:item.nome,numero:item.numero,imagem:item.imagem,tipo:item.tipo},function(){},function(){});alert("⭐ Pokémon favoritado!");};
   window.addEventListener("load",sincronizarContasLocais);
