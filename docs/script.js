@@ -64,5 +64,6 @@
   };
   window.chaveFavoritos=function(){var u=usuarioAtual();return "favoritos_"+(u ? (u.id||u.email) : "anonimo");};
   window.favoritarPokemon=function(p){var u=usuarioAtual(), list=json(chaveFavoritos(),[]), item={nome:p.name,numero:p.id,imagem:p.sprites.other["official-artwork"].front_default,tipo:p.types.map(function(t){return t.type.name;}).join(", ")},i;for(i=0;i<list.length;i++)if(String(list[i].numero)===String(item.numero)){alert("Esse Pokémon já está nos favoritos!");return;}list.push(item);localStorage.setItem(chaveFavoritos(),JSON.stringify(list));if(u&&u.id)api("POST","/favoritos",{usuario_id:u.id,nome:item.nome,numero:item.numero,imagem:item.imagem,tipo:item.tipo},function(){},function(){});alert("⭐ Pokémon favoritado!");};
-  window.addEventListener("load",sincronizarContasLocais);
+  window.atualizarCampoCodigo=function(){var select=document.getElementById('cargo'),area=document.getElementById('areaCodigo'),aviso=document.getElementById('avisoCargo');if(!select||!area)return;var precisa=select.value==='ADM'||select.value==='Assistente';area.style.display=precisa?'block':'none';if(aviso)aviso.style.display=precisa?'none':'block';};
+  window.addEventListener("load",function(){sincronizarContasLocais();atualizarCampoCodigo();});
 }());
