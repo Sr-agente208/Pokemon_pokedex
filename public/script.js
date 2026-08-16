@@ -4,6 +4,9 @@
   window.API_BASE = location.hostname.indexOf("github.io") >= 0 ? "https://pokemonpokedex-production-0fc5.up.railway.app" : "";
   function json(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch (e) { return fallback; } }
   window.usuarioAtual = function () { return json("usuarioLogado", null); };
+  /* Alertas próprios: alertas do navegador sempre mostram o domínio e não podem ser renomeados. */
+  window.mostrarMensagem=function(texto){var caixa=document.getElementById('avisoPokedex');if(!caixa){caixa=document.createElement('div');caixa.id='avisoPokedex';caixa.style.cssText='position:fixed;z-index:99999;inset:0;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;padding:20px';caixa.innerHTML='<div style="background:#172033;color:#fff;width:min(420px,100%);padding:25px;border-radius:22px;box-shadow:0 10px 35px #000;text-align:center;border:2px solid #8b00b9"><h2 style="color:#fff;margin:0 0 18px">⚡ Pokédex</h2><p id="avisoPokedexTexto" style="font-size:18px;line-height:1.5"></p><button onclick="document.getElementById(\'avisoPokedex\').style.display=\'none\'" style="background:#6d008e;color:#fff;padding:11px 34px;border:1px solid #fff;border-radius:9px;font-size:16px">OK</button></div>';document.body.appendChild(caixa);}document.getElementById('avisoPokedexTexto').textContent=texto;caixa.style.display='flex';};
+  window.alert=window.mostrarMensagem;
   window.api = function (method, url, body, ok, fail) {
     /* Supabase: autenticação e banco sem Railway. */
     if (window.supabaseClient) {
