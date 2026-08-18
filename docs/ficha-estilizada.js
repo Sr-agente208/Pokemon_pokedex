@@ -404,10 +404,53 @@
   };
   var FAMILIAS = { helvetica: "Arial, sans-serif", times: "'Times New Roman', serif", courier: "'Courier New', monospace" };
 
+  /* Glifos com boa cobertura em fontes comuns (Windows, Android, iOS). */
+  var GLIFOS_WORD = {
+    raios: "\u2666", chamas: "\u25B2", bolhas: "\u25CB", folhas: "\u2663",
+    cristais: "\u25C6", estrelas: "\u2605", nevoa: "\u25CC", ondas: "\u223C",
+    circuito: "\u25A0", petalas: "\u2740", fragmentos: "\u25AC", espinhos: "\u25B4"
+  };
+
   function faixaEfeito(efeito, cor, quantidade) {
-    var g = GLIFOS[efeito] || "✦", linha = "", i;
+    /* Vários glifos decorativos não existem nas fontes de celular e viram
+       quadradinhos/bolinhas. Usamos apenas caracteres de cobertura ampla. */
+    var g = GLIFOS_WORD[efeito] || "\u2022", linha = "", i;
     for (i = 0; i < quantidade; i++) linha += g + " ";
-    return '<div style="color:' + cor + ';font-size:15px;letter-spacing:6px;line-height:1.1">' + linha + "</div>";
+    return '<div style="color:' + cor + ';font-size:14px;letter-spacing:5px;line-height:1.2">' + linha + "</div>";
+  }
+
+  /* O .doc é um arquivo solto: uma <img> apontando para a internet aparece
+     quebrada offline. Convertemos a arte em data URI para embutir no arquivo. */
+  function arteEmbutida(url, pronto) {
+    if (!url) { pronto(""); return; }
+    /* Se a imagem não responder, o download não pode ficar travado:
+       seguimos com a URL original depois de 6 segundos. */
+    var respondeu = false;
+    function terminar(valor) {
+      if (respondeu) return;
+      respondeu = true;
+      pronto(valor);
+    }
+    setTimeout(function () { terminar(url); }, 6000);
+    var img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function () {
+      try {
+        var c = document.createElement("canvas");
+        c.width = img.naturalWidth || 320;
+        c.height = img.naturalHeight || 320;
+        c.getContext("2d").drawImage(img, 0, 0);
+        terminar(c.toDataURL("image/png"));
+      } catch (e) { terminar(url); }
+    };
+    img.onerror = function () { terminar(url); };
+    img.src = url;
+  }
+
+  /* Linha "rótulo: valor" da tabela de dados, com estilo inline. */
+  function linhaInfo(rotulo, valor) {
+    return '<tr><td style="padding:7px 14px;font-weight:bold;width:110px">' + rotulo +
+      '</td><td style="padding:7px 14px">' + valor + "</td></tr>";
   }
 
   window.baixarFichaWord = function (botao) {
@@ -423,56 +466,105 @@
       var familia = FAMILIAS[estilo.fonte] || FAMILIAS.helvetica;
       /* Mesmas cores sólidas do PDF: onde o texto é branco, o fundo precisa ser escuro. */
       var solidaPrim = fundoParaTextoBranco(paleta.primaria);
-      var corMarcaWord = misturar(solidaPrim, paleta.fundo, 0.22);
+      /* A marca agora é uma faixa própria (não fica atrás do texto), então
+         pode ter contraste real em vez de imitar transparência. */
+      var corMarcaWord = misturar(solidaPrim, paleta.fundo, 0.55);
       var solidaSec = fundoParaTextoBranco(paleta.secundaria);
       var solidaDest = fundoParaTextoBranco(paleta.destaque);
+      var tituloCapa = "\u26A1 Ficha Pok\u00E9mon";
+      var arteOriginal = pokemon.sprites.other["official-artwork"].front_default || pokemon.sprites.front_default;
+      arteEmbutida(arteOriginal, function (arteUrl) {
       var stats = pokemon.stats || [], linhas = "", maximo = 0;
       for (i = 0; i < stats.length && i < 6; i++) maximo = Math.max(maximo, stats[i].base_stat);
       for (i = 0; i < stats.length && i < 6; i++) {
-        var largura = Math.round((stats[i].base_stat / Math.max(maximo, 100)) * 100);
-        linhas += '<tr><td style="padding:5px 10px;font-weight:bold;color:' + paleta.texto + '">' +
+        /* Larguras em pixels: porcentagem dentro de tabela aninhada é o que
+           faz a barra "encolher" em alguns leitores de .doc. */
+        var cheio = Math.max(6, Math.round((stats[i].base_stat / Math.max(maximo, 100)) * 300));
+        var vazio = Math.max(0, 300 - cheio);
+        var corBarra = i % 2 === 0 ? solidaPrim : solidaDest;
+        linhas += '<tr><td style="padding:5px 10px;font-weight:bold;font-size:12px;color:' + paleta.texto + '" width="110">' +
           stats[i].stat.name.replace("special-", "sp. ").toUpperCase() + "</td>" +
-          '<td style="padding:5px 10px;width:320px"><table cellspacing="0" cellpadding="0" style="width:300px;background:#ecebf3"><tr>' +
-          '<td style="height:9px;width:' + largura + '%;background:' + (i % 2 === 0 ? solidaPrim : solidaDest) + '"></td>' +
-          '<td style="height:9px"></td></tr></table></td>' +
-          '<td style="padding:5px 10px;color:' + solidaDest + ';font-weight:bold">' + stats[i].base_stat + "</td></tr>";
+          '<td style="padding:5px 10px" width="310">' +
+          '<table cellspacing="0" cellpadding="0" width="300" style="border-collapse:collapse"><tr>' +
+          '<td width="' + cheio + '" bgcolor="' + corBarra + '" style="background:' + corBarra +
+          ';height:10px;line-height:10px;font-size:1px">&nbsp;</td>' +
+          (vazio > 0 ? '<td width="' + vazio + '" bgcolor="#ecebf3" style="background:#ecebf3;height:10px;line-height:10px;font-size:1px">&nbsp;</td>' : "") +
+          "</tr></table></td>" +
+          '<td style="padding:5px 10px;color:' + solidaDest + ';font-weight:bold;font-size:12px">' +
+          stats[i].base_stat + "</td></tr>";
       }
 
       var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">' +
-        '<head><meta charset="utf-8"><title>' + pokemon.name + '</title><style>' +
-        "@page{size:A4;margin:2cm}" +
-        "body{font-family:" + familia + ";color:" + paleta.texto + ";background:" + paleta.fundo + "}" +
-        /* O Word ignora "opacity" e "transform": a marca precisa ser uma cor
-           clara de verdade, senão sai sólida por cima do texto ou some. */
-        ".marca{color:" + corMarcaWord +
-        ";font-size:54px;font-weight:bold;text-align:center;letter-spacing:10px;margin:0 0 6px}" +
-        ".capa{background:" + solidaPrim + ";color:#ffffff;padding:26px 28px;border-bottom:6px solid " + paleta.secundaria + "}" +
-        ".capa h1{margin:0;font-size:30px}.capa .selo{font-size:13px;letter-spacing:3px;margin-top:6px}" +
-        ".nome{font-size:28px;color:" + solidaPrim + ";border-bottom:3px solid " + paleta.secundaria + ";padding-bottom:8px;margin:24px 0 6px}" +
-        ".tipos{display:inline-block;background:" + solidaSec + ";color:#ffffff;font-weight:bold;padding:6px 16px;letter-spacing:2px}" +
-        ".info{background:#ffffff;padding:18px 20px;line-height:1.9;border:1px solid " + paleta.secundaria + ";margin-top:16px}" +
-        ".titulo{color:" + solidaPrim + ";font-size:15px;font-weight:bold;letter-spacing:2px;margin:26px 0 6px}" +
-        ".frase{color:" + solidaDest + ";font-size:16px;font-style:italic;font-weight:bold;border-left:5px solid " + paleta.secundaria + ";padding:8px 14px;margin-top:24px}" +
-        ".rodape{margin-top:14px;color:#77718f;font-size:11px}" +
-        ".arte{float:right;width:180px;height:180px}" +
-        "</style></head><body>" +
-        '<div class="capa"><h1>⚡ Ficha Pokémon</h1><div class="selo">' + estilo.titulo + "</div>" +
-        faixaEfeito(estilo.efeito, "rgba(255,255,255,.75)", 18) + "</div>" +
-        '<div class="marca">' + estilo.marca.texto + "</div>" +
-        '<img class="arte" src="' + (pokemon.sprites.other["official-artwork"].front_default || pokemon.sprites.front_default) + '">' +
-        '<h2 class="nome">' + String(pokemon.name).toUpperCase() + "</h2>" +
-        '<div class="tipos">' + tipos.join(" • ").toUpperCase() + "</div>" +
-        '<div class="titulo">DADOS PRINCIPAIS</div>' +
-        '<div class="info"><strong>Número:</strong> #' + ("0000" + pokemon.id).slice(-4) + "<br>" +
-        "<strong>Tipos:</strong> " + tipos.join(", ") + "<br>" +
-        "<strong>Altura:</strong> " + (pokemon.height / 10) + " m<br>" +
-        "<strong>Peso:</strong> " + (pokemon.weight / 10) + " kg</div>" +
-        '<div class="titulo">ATRIBUTOS</div><table cellspacing="0" cellpadding="0">' + linhas + "</table>" +
+        '<head><meta charset="utf-8"><title>' + pokemon.name + "</title>" +
+        "<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml><![endif]-->" +
+        "<style>@page{size:A4;margin:1.6cm}</style></head>" +
+        /* Word e visualizadores como o WPS costumam descartar o <style> do
+           cabeçalho: todo o visual precisa ir em style="" inline, e o layout
+           em tabelas, que é o que esses programas renderizam de forma confiável. */
+        '<body style="margin:0;font-family:' + familia + ";color:" + paleta.texto +
+        ";background:" + paleta.fundo + '">' +
+        '<table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse">' +
+
+        /* Capa */
+        '<tr><td bgcolor="' + solidaPrim + '" style="background:' + solidaPrim +
+        ";color:#ffffff;padding:24px 26px;border-bottom:6px solid " + paleta.secundaria + '">' +
+        '<div style="font-size:28px;font-weight:bold;color:#ffffff">' + tituloCapa + "</div>" +
+        '<div style="font-size:13px;letter-spacing:3px;margin-top:6px;color:#ffffff">' +
+        estilo.titulo + "</div>" +
+        faixaEfeito(estilo.efeito, "#ffffff", 18) +
+        "</td></tr>" +
+
+        /* Marca-d'água: no Word não há sobreposição confiável, então ela vira
+           uma faixa própria em tom claro, logo abaixo da capa. */
+        '<tr><td align="center" style="padding:10px 0 2px">' +
+        '<span style="color:' + corMarcaWord + ";font-size:46px;font-weight:bold;letter-spacing:10px" +
+        '">' + estilo.marca.texto + "</span></td></tr>" +
+
+        /* Nome + arte */
+        '<tr><td style="padding:0 26px">' +
+        '<table cellspacing="0" cellpadding="0" width="100%"><tr>' +
+        '<td valign="top" style="padding-top:6px">' +
+        '<div style="font-size:27px;font-weight:bold;color:' + solidaPrim + '">' +
+        String(pokemon.name).toUpperCase() + "</div>" +
+        '<div style="font-size:12px;color:' + solidaDest + ';letter-spacing:2px;padding:2px 0 10px">Nº ' +
+        ("0000" + pokemon.id).slice(-4) + " &#8226; FICHA DE TREINADOR</div>" +
+        '<span style="background:' + solidaSec + ';color:#ffffff;font-weight:bold;padding:6px 16px;letter-spacing:2px;font-size:13px">' +
+        tipos.join(" &#8226; ").toUpperCase() + "</span>" +
+        "</td>" +
+        '<td valign="top" width="170" align="right">' +
+        '<img src="' + arteUrl + '" width="160" height="160" alt="' + pokemon.name + '">' +
+        "</td></tr></table>" +
+        '<div style="border-bottom:3px solid ' + paleta.secundaria + ';margin-top:14px"></div>' +
+        "</td></tr>" +
+
+        /* Dados principais */
+        '<tr><td style="padding:18px 26px 0">' +
+        '<div style="color:' + solidaPrim + ';font-size:14px;font-weight:bold;letter-spacing:2px;padding-bottom:6px">DADOS PRINCIPAIS</div>' +
+        '<table cellspacing="0" cellpadding="0" width="100%" style="border:1px solid ' + paleta.secundaria +
+        ';background:#ffffff">' +
+        linhaInfo("Número", "#" + ("0000" + pokemon.id).slice(-4)) +
+        linhaInfo("Tipos", tipos.join(", ")) +
+        linhaInfo("Altura", (pokemon.height / 10) + " m") +
+        linhaInfo("Peso", (pokemon.weight / 10) + " kg") +
+        "</table></td></tr>" +
+
+        /* Atributos */
+        '<tr><td style="padding:20px 26px 0">' +
+        '<div style="color:' + solidaPrim + ';font-size:14px;font-weight:bold;letter-spacing:2px;padding-bottom:6px">ATRIBUTOS</div>' +
+        '<table cellspacing="0" cellpadding="0" width="100%">' + linhas + "</table>" +
+        "</td></tr>" +
+
+        /* Rodapé */
+        '<tr><td style="padding:22px 26px 26px">' +
         faixaEfeito(estilo.efeito, solidaSec, 22) +
-        '<div class="frase">“' + estilo.frase + '”</div>' +
-        '<p class="rodape">Gerado pela Pokédex • ' + new Date().toLocaleDateString("pt-BR") +
-        " • estilo exclusivo (" + estilo.efeito + ") criado por IA.</p>" +
-        "</body></html>";
+        '<div style="color:' + solidaDest + ";font-size:15px;font-style:italic;font-weight:bold;border-left:5px solid " +
+        paleta.secundaria + ';padding:8px 14px;margin-top:10px">&#8220;' + estilo.frase + "&#8221;</div>" +
+        '<div style="margin-top:12px;color:#77718f;font-size:11px">Gerado pela Pokédex &#8226; ' +
+        new Date().toLocaleDateString("pt-BR") + " &#8226; estilo exclusivo (" + estilo.efeito +
+        ") criado por IA.</div>" +
+        "</td></tr>" +
+
+        "</table></body></html>";
 
       var blob = new Blob(["\ufeff", html], { type: "application/msword" });
       var a = document.createElement("a");
@@ -483,6 +575,7 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(a.href);
       if (botao) { botao.disabled = false; botao.innerHTML = rotulo; }
+      });
     });
   };
 
