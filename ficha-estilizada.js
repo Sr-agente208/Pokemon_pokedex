@@ -406,7 +406,7 @@
 
   /* Glifos com boa cobertura em fontes comuns (Windows, Android, iOS). */
   /* Aparece no rodapé das fichas: identifica qual build gerou o arquivo. */
-  var VERSAO_GERADOR = "v70e5727";
+  var VERSAO_GERADOR = "v8c23703";
 
   var GLIFOS_WORD = {
     raios: "\u2666", chamas: "\u25B2", bolhas: "\u25CB", folhas: "\u2663",
