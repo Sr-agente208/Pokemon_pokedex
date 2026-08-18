@@ -405,6 +405,9 @@
   var FAMILIAS = { helvetica: "Arial, sans-serif", times: "'Times New Roman', serif", courier: "'Courier New', monospace" };
 
   /* Glifos com boa cobertura em fontes comuns (Windows, Android, iOS). */
+  /* Aparece no rodapé das fichas: identifica qual build gerou o arquivo. */
+  var VERSAO_GERADOR = "v8d27014";
+
   var GLIFOS_WORD = {
     raios: "\u2666", chamas: "\u25B2", bolhas: "\u25CB", folhas: "\u2663",
     cristais: "\u25C6", estrelas: "\u2605", nevoa: "\u25CC", ondas: "\u223C",
@@ -561,7 +564,7 @@
         paleta.secundaria + ';padding:8px 14px;margin-top:10px">&#8220;' + estilo.frase + "&#8221;</div>" +
         '<div style="margin-top:12px;color:#77718f;font-size:11px">Gerado pela Pokédex &#8226; ' +
         new Date().toLocaleDateString("pt-BR") + " &#8226; estilo exclusivo (" + estilo.efeito +
-        ") criado por IA.</div>" +
+        ") criado por IA. " + VERSAO_GERADOR + "</div>" +
         "</td></tr>" +
 
         "</table></body></html>";
