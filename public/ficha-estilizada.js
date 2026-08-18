@@ -406,7 +406,7 @@
 
   /* Glifos com boa cobertura em fontes comuns (Windows, Android, iOS). */
   /* Aparece no rodapé das fichas: identifica qual build gerou o arquivo. */
-  var VERSAO_GERADOR = "v8d27014";
+  var VERSAO_GERADOR = "v70e5727";
 
   var GLIFOS_WORD = {
     raios: "\u2666", chamas: "\u25B2", bolhas: "\u25CB", folhas: "\u2663",
@@ -419,7 +419,7 @@
        quadradinhos/bolinhas. Usamos apenas caracteres de cobertura ampla. */
     var g = GLIFOS_WORD[efeito] || "\u2022", linha = "", i;
     for (i = 0; i < quantidade; i++) linha += g + " ";
-    return '<div style="color:' + cor + ';font-size:14px;letter-spacing:5px;line-height:1.2">' + linha + "</div>";
+    return '<div style="color:' + cor + ';font-size:11pt;letter-spacing:4pt;line-height:1.2">' + linha + "</div>";
   }
 
   /* O .doc é um arquivo solto: uma <img> apontando para a internet aparece
@@ -480,20 +480,19 @@
       var stats = pokemon.stats || [], linhas = "", maximo = 0;
       for (i = 0; i < stats.length && i < 6; i++) maximo = Math.max(maximo, stats[i].base_stat);
       for (i = 0; i < stats.length && i < 6; i++) {
-        /* Larguras em pixels: porcentagem dentro de tabela aninhada é o que
-           faz a barra "encolher" em alguns leitores de .doc. */
-        var cheio = Math.max(6, Math.round((stats[i].base_stat / Math.max(maximo, 100)) * 300));
-        var vazio = Math.max(0, 300 - cheio);
+        /* A proporção da barra vai em %, que foi o que o WPS respeitou; o
+           width= em pixels da tabela aninhada saía todo do mesmo tamanho. */
+        var pct = Math.max(3, Math.round((stats[i].base_stat / Math.max(maximo, 100)) * 100));
         var corBarra = i % 2 === 0 ? solidaPrim : solidaDest;
-        linhas += '<tr><td style="padding:5px 10px;font-weight:bold;font-size:12px;color:' + paleta.texto + '" width="110">' +
+        linhas += '<tr><td style="padding:5px 10px;font-weight:bold;font-size:9pt;color:' + paleta.texto + '" width="120">' +
           stats[i].stat.name.replace("special-", "sp. ").toUpperCase() + "</td>" +
-          '<td style="padding:5px 10px" width="310">' +
-          '<table cellspacing="0" cellpadding="0" width="300" style="border-collapse:collapse"><tr>' +
-          '<td width="' + cheio + '" bgcolor="' + corBarra + '" style="background:' + corBarra +
-          ';height:10px;line-height:10px;font-size:1px">&nbsp;</td>' +
-          (vazio > 0 ? '<td width="' + vazio + '" bgcolor="#ecebf3" style="background:#ecebf3;height:10px;line-height:10px;font-size:1px">&nbsp;</td>' : "") +
+          '<td style="padding:5px 10px" width="320">' +
+          '<table cellspacing="0" cellpadding="0" width="300" style="width:300px;background:#ecebf3;border-collapse:collapse"><tr>' +
+          '<td width="' + pct + '%" bgcolor="' + corBarra + '" style="width:' + pct +
+          '%;background:' + corBarra + ';height:12px;line-height:12px;font-size:1pt">&nbsp;</td>' +
+          '<td bgcolor="#ecebf3" style="background:#ecebf3;height:12px;line-height:12px;font-size:1pt">&nbsp;</td>' +
           "</tr></table></td>" +
-          '<td style="padding:5px 10px;color:' + solidaDest + ';font-weight:bold;font-size:12px">' +
+          '<td style="padding:5px 10px;color:' + solidaDest + ';font-weight:bold;font-size:9pt">' +
           stats[i].base_stat + "</td></tr>";
       }
 
@@ -506,43 +505,48 @@
            em tabelas, que é o que esses programas renderizam de forma confiável. */
         '<body style="margin:0;font-family:' + familia + ";color:" + paleta.texto +
         ";background:" + paleta.fundo + '">' +
-        '<table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse">' +
+        '<table cellspacing="0" cellpadding="0" width="100%" style="width:100%;border-collapse:collapse">' +
 
         /* Capa */
-        '<tr><td bgcolor="' + solidaPrim + '" style="background:' + solidaPrim +
-        ";color:#ffffff;padding:24px 26px;border-bottom:6px solid " + paleta.secundaria + '">' +
-        '<div style="font-size:28px;font-weight:bold;color:#ffffff">' + tituloCapa + "</div>" +
-        '<div style="font-size:13px;letter-spacing:3px;margin-top:6px;color:#ffffff">' +
+        '<tr><td width="100%" bgcolor="' + solidaPrim + '" style="width:100%;background:' + solidaPrim +
+        ";color:#ffffff;padding:20px 26px;border-bottom:6px solid " + paleta.secundaria + '">' +
+        '<div style="font-size:21pt;font-weight:bold;color:#ffffff">' + tituloCapa + "</div>" +
+        '<div style="font-size:10pt;letter-spacing:3px;margin-top:6px;color:#ffffff">' +
         estilo.titulo + "</div>" +
         faixaEfeito(estilo.efeito, "#ffffff", 18) +
         "</td></tr>" +
 
         /* Marca-d'água: no Word não há sobreposição confiável, então ela vira
            uma faixa própria em tom claro, logo abaixo da capa. */
-        '<tr><td align="center" style="padding:10px 0 2px">' +
-        '<span style="color:' + corMarcaWord + ";font-size:46px;font-weight:bold;letter-spacing:10px" +
-        '">' + estilo.marca.texto + "</span></td></tr>" +
+        '<tr><td align="center" width="100%" style="width:100%;padding:12px 0 4px;color:' + corMarcaWord +
+        ';font-size:30pt;font-weight:bold;letter-spacing:8pt;text-align:center">' +
+        estilo.marca.texto + "</td></tr>" +
 
         /* Nome + arte */
         '<tr><td style="padding:0 26px">' +
         '<table cellspacing="0" cellpadding="0" width="100%"><tr>' +
         '<td valign="top" style="padding-top:6px">' +
-        '<div style="font-size:27px;font-weight:bold;color:' + solidaPrim + '">' +
+        '<div style="font-size:20pt;font-weight:bold;color:' + solidaPrim + '">' +
         String(pokemon.name).toUpperCase() + "</div>" +
-        '<div style="font-size:12px;color:' + solidaDest + ';letter-spacing:2px;padding:2px 0 10px">Nº ' +
+        '<div style="font-size:9pt;color:' + solidaDest + ';letter-spacing:2px;padding:2px 0 10px">Nº ' +
         ("0000" + pokemon.id).slice(-4) + " &#8226; FICHA DE TREINADOR</div>" +
-        '<span style="background:' + solidaSec + ';color:#ffffff;font-weight:bold;padding:6px 16px;letter-spacing:2px;font-size:13px">' +
-        tipos.join(" &#8226; ").toUpperCase() + "</span>" +
+        '<table cellspacing="0" cellpadding="0" style="border-collapse:collapse"><tr>' +
+        '<td bgcolor="' + solidaSec + '" style="background:' + solidaSec +
+        ';color:#ffffff;font-weight:bold;padding:7px 18px;letter-spacing:2pt;font-size:10pt">' +
+        tipos.join(" &#8226; ").toUpperCase() + "</td></tr></table>" +
         "</td>" +
-        '<td valign="top" width="170" align="right">' +
-        '<img src="' + arteUrl + '" width="160" height="160" alt="' + pokemon.name + '">' +
-        "</td></tr></table>" +
+        (arteUrl.indexOf("data:") === 0
+          ? '<td valign="top" width="170" align="right">' +
+            '<img src="' + arteUrl + '" width="160" height="160" style="width:160px;height:160px" alt="' +
+            pokemon.name + '"></td>'
+          : "") +
+        "</tr></table>" +
         '<div style="border-bottom:3px solid ' + paleta.secundaria + ';margin-top:14px"></div>' +
         "</td></tr>" +
 
         /* Dados principais */
         '<tr><td style="padding:18px 26px 0">' +
-        '<div style="color:' + solidaPrim + ';font-size:14px;font-weight:bold;letter-spacing:2px;padding-bottom:6px">DADOS PRINCIPAIS</div>' +
+        '<div style="color:' + solidaPrim + ';font-size:10pt;font-weight:bold;letter-spacing:2px;padding-bottom:6px">DADOS PRINCIPAIS</div>' +
         '<table cellspacing="0" cellpadding="0" width="100%" style="border:1px solid ' + paleta.secundaria +
         ';background:#ffffff">' +
         linhaInfo("Número", "#" + ("0000" + pokemon.id).slice(-4)) +
@@ -553,16 +557,16 @@
 
         /* Atributos */
         '<tr><td style="padding:20px 26px 0">' +
-        '<div style="color:' + solidaPrim + ';font-size:14px;font-weight:bold;letter-spacing:2px;padding-bottom:6px">ATRIBUTOS</div>' +
+        '<div style="color:' + solidaPrim + ';font-size:10pt;font-weight:bold;letter-spacing:2px;padding-bottom:6px">ATRIBUTOS</div>' +
         '<table cellspacing="0" cellpadding="0" width="100%">' + linhas + "</table>" +
         "</td></tr>" +
 
         /* Rodapé */
         '<tr><td style="padding:22px 26px 26px">' +
         faixaEfeito(estilo.efeito, solidaSec, 22) +
-        '<div style="color:' + solidaDest + ";font-size:15px;font-style:italic;font-weight:bold;border-left:5px solid " +
+        '<div style="color:' + solidaDest + ";font-size:11pt;font-style:italic;font-weight:bold;border-left:5px solid " +
         paleta.secundaria + ';padding:8px 14px;margin-top:10px">&#8220;' + estilo.frase + "&#8221;</div>" +
-        '<div style="margin-top:12px;color:#77718f;font-size:11px">Gerado pela Pokédex &#8226; ' +
+        '<div style="margin-top:12px;color:#77718f;font-size:8pt">Gerado pela Pokédex &#8226; ' +
         new Date().toLocaleDateString("pt-BR") + " &#8226; estilo exclusivo (" + estilo.efeito +
         ") criado por IA. " + VERSAO_GERADOR + "</div>" +
         "</td></tr>" +
