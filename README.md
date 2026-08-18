@@ -22,6 +22,7 @@
 | 🎨 Personalização | Tema claro/escuro e degradê com duas cores. |
 | 📚 História | Linha do tempo de anime, mangá e jogos, com links e ilustrações. |
 | 📄 Downloads | Baixe a história Pokémon em PDF ou Word estilizado. |
+| 🤖 Ficha com IA | Cada Pokémon ganha uma ficha única em PDF e Word, com paleta, marca-d'água, frase e efeito criados pela IA. |
 | 🛡️ Cargos | Usuário, Assistente e ADM com códigos temporários. |
 
 ## 🧭 Como usar
@@ -44,11 +45,54 @@ O projeto usa Supabase para autenticação, recados, favoritos e perfis.
 
 </details>
 
+<details>
+<summary><strong>🤖 Fichas estilizadas por IA (Groq)</strong></summary>
+
+Cada Pokémon recebe um visual próprio na ficha em PDF e Word: paleta de cores,
+marca-d'água, título, frase de efeito e um entre 12 efeitos gráficos.
+A análise é feita uma única vez por Pokémon e fica salva no banco (cache).
+
+**Como funciona**
+
+1. O navegador procura o estilo no `localStorage`.
+2. Se não achar, procura na tabela `pokemon_styles`.
+3. Se ainda não existir, chama a Edge Function `pokemon-style`, que lê a PokéAPI,
+   pede a análise à Groq, valida o resultado e salva no banco.
+4. Se qualquer etapa falhar, uma paleta local baseada no tipo do Pokémon é usada.
+   **A ficha nunca deixa de ser gerada.**
+
+**Instalação**
+
+1. Execute `supabase/pokemon-styles.sql` no **SQL Editor** (cria a tabela e as políticas).
+2. Confirme que o secret `GROQ_API_KEY` existe em **Edge Functions → Secrets**.
+3. Publique a função:
+
+   ```bash
+   supabase functions deploy pokemon-style --no-verify-jwt
+   ```
+
+**Testando**
+
+```bash
+curl -X POST "https://SEU-PROJETO.supabase.co/functions/v1/pokemon-style" \
+  -H "Content-Type: application/json" \
+  -d '{"pokemon":"pikachu"}'
+```
+
+Resposta: `{ "estilo": { ... }, "cache": false }`.
+Use `{"pokemon":"pikachu","recriar":true}` para gerar um estilo novo.
+
+> A `GROQ_API_KEY` fica **apenas** nos Secrets do Supabase. Ela nunca vai para o
+> navegador nem para o repositório.
+
+</details>
+
 ## 🧰 Tecnologias
 
 - HTML, CSS e JavaScript
 - [PokéAPI](https://pokeapi.co/)
-- [Supabase](https://supabase.com/)
+- [Supabase](https://supabase.com/) (banco, autenticação e Edge Functions)
+- [Groq](https://groq.com/) para as fichas estilizadas
 - jsPDF
 - GitHub Pages
 
