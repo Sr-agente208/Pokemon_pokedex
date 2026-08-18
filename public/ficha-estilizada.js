@@ -158,6 +158,18 @@
     return cor;
   }
 
+  /* O Word (HTML legado) ignora "opacity". Para ter marca-d'água de verdade,
+     misturamos a cor com o fundo e geramos uma cor clara sólida equivalente. */
+  function misturar(hex, hexFundo, peso) {
+    var a = hexRgb(hex), b = hexRgb(hexFundo), i, saida = "#";
+    for (i = 0; i < 3; i++) {
+      var v = Math.round(b[i] + (a[i] - b[i]) * peso);
+      if (v < 0) v = 0; if (v > 255) v = 255;
+      saida += ("0" + v.toString(16)).slice(-2);
+    }
+    return saida;
+  }
+
   /* Cada efeito é um carimbo desenhado várias vezes em posições sorteadas. */
   function carimbo(doc, efeito, x, y, t) {
     var i, deltas;
@@ -302,7 +314,9 @@
     /* Nomes longos encolhem para nunca vazar do cartão. */
     doc.setFontSize(Math.max(26, Math.min(58, 420 / Math.max(estilo.marca.texto.length, 4))));
     doc.setTextColor(cTit[0], cTit[1], cTit[2]);
-    comOpacidade(doc, estilo.marca.opacidade, function () {
+    /* A marca-d'água precisa ser percebida sem competir com o texto:
+       usamos um piso de opacidade, já que valores muito baixos somem na impressão. */
+    comOpacidade(doc, Math.max(estilo.marca.opacidade, 0.19), function () {
       doc.text(estilo.marca.texto, 34, 228, { angle: estilo.marca.rotacao, baseline: "middle" });
     });
 
@@ -409,6 +423,7 @@
       var familia = FAMILIAS[estilo.fonte] || FAMILIAS.helvetica;
       /* Mesmas cores sólidas do PDF: onde o texto é branco, o fundo precisa ser escuro. */
       var solidaPrim = fundoParaTextoBranco(paleta.primaria);
+      var corMarcaWord = misturar(solidaPrim, paleta.fundo, 0.22);
       var solidaSec = fundoParaTextoBranco(paleta.secundaria);
       var solidaDest = fundoParaTextoBranco(paleta.destaque);
       var stats = pokemon.stats || [], linhas = "", maximo = 0;
@@ -427,9 +442,10 @@
         '<head><meta charset="utf-8"><title>' + pokemon.name + '</title><style>' +
         "@page{size:A4;margin:2cm}" +
         "body{font-family:" + familia + ";color:" + paleta.texto + ";background:" + paleta.fundo + "}" +
-        ".marca{color:" + solidaPrim + ";opacity:" + estilo.marca.opacidade +
-        ";font-size:60px;font-weight:bold;text-align:center;letter-spacing:10px;" +
-        "transform:rotate(" + (-Math.abs(estilo.marca.rotacao) / 3) + "deg);margin:0 0 6px}" +
+        /* O Word ignora "opacity" e "transform": a marca precisa ser uma cor
+           clara de verdade, senão sai sólida por cima do texto ou some. */
+        ".marca{color:" + corMarcaWord +
+        ";font-size:54px;font-weight:bold;text-align:center;letter-spacing:10px;margin:0 0 6px}" +
         ".capa{background:" + solidaPrim + ";color:#ffffff;padding:26px 28px;border-bottom:6px solid " + paleta.secundaria + "}" +
         ".capa h1{margin:0;font-size:30px}.capa .selo{font-size:13px;letter-spacing:3px;margin-top:6px}" +
         ".nome{font-size:28px;color:" + solidaPrim + ";border-bottom:3px solid " + paleta.secundaria + ";padding-bottom:8px;margin:24px 0 6px}" +
