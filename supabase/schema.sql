@@ -80,7 +80,7 @@ alter table public.recados enable row level security;
 alter table public.favoritos enable row level security;
 alter table public.verification_codes enable row level security;
 create policy "profiles public read" on public.profiles for select to authenticated using (ativo=true);
-create policy "ADM can update profiles" on public.profiles for update to authenticated using (exists (select 1 from public.profiles where id = auth.uid() and cargo = 'ADM' and ativo));
+create policy "Staff can update profiles" on public.profiles for update to authenticated using (exists (select 1 from public.profiles where id = auth.uid() and cargo in ('ADM', 'Dono', 'Sub Dono', 'Analista de Sistema') and ativo));
 create policy "recados public read" on public.recados for select to anon, authenticated using (true);
 create policy "authenticated inserts recados" on public.recados for insert to authenticated with check (auth.uid() = user_id);
 create policy "owner or staff deletes recados" on public.recados for delete to authenticated using (user_id=auth.uid() or exists(select 1 from profiles where id=auth.uid() and cargo in ('ADM','Assistente') and ativo));
