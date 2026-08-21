@@ -1,79 +1,64 @@
-# ⚡ Pokédex - Poké Pesquisa
+<div align="center">
+  <img src="banner.svg" alt="Pokédex" width="100%" />
 
-Aplicação web para buscar informações sobre Pokémons usando a PokeAPI.
+  # ⚡ Pokédex
 
-## 🚀 Funcionalidades
+  **Pesquise, favorite e descubra o universo Pokémon.**
 
-- 🔍 Busca de Pokémons por nome ou número
-- ⭐ Sistema de favoritos (localStorage)
-- 🔊 Ouvir o som (cry) do Pokémon
-- 📄 Exportar para PDF
-- 📝 Exportar para Word
-- 👤 Sistema de autenticação de usuários
-- 💾 Banco de dados PostgreSQL (Railway)
+  [![GitHub Pages](https://img.shields.io/badge/Dispon%C3%ADvel-GitHub%20Pages-6f0b8f?style=for-the-badge&logo=github)](https://sr-agente208.github.io/Pokemon_pokedex/)
+  [![PokéAPI](https://img.shields.io/badge/Dados-Pok%C3%A9API-e3350d?style=for-the-badge)](https://pokeapi.co/)
+  [![Supabase](https://img.shields.io/badge/Backend-Supabase-3ecf8e?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+</div>
 
-## 📁 Estrutura do Projeto
+---
 
-```
-├── src/
-│   ├── config/
-│   │   └── database.js      # Configuração do banco de dados
-│   └── server.js             # Servidor Express
-├── public/                    # Arquivos estáticos (HTML, CSS, JS)
-│   └── index.html
-├── .env.example              # Variáveis de ambiente (exemplo)
-├── package.json
-├── railway.json              # Configuração do Railway
-└── README.md
-```
+## ✨ Recursos
 
-## 🔧 Instalação
+| Recurso | Descrição |
+| --- | --- |
+| 🔎 Pesquisa Pokémon | Busca por nome ou número, com imagem, tipo, altura e peso. |
+| ⭐ Favoritos | Salve Pokémon na sua lista pessoal. |
+| 💬 Mural | Compartilhe recados com a comunidade. |
+| 🎨 Personalização | Tema claro/escuro e degradê com duas cores. |
+| 📚 História | Linha do tempo de anime, mangá e jogos, com links e ilustrações. |
+| 📄 Downloads | Baixe a história Pokémon em PDF ou Word estilizado. |
+| 🛡️ Cargos | Usuário, Assistente e ADM com códigos temporários. |
 
-1. Clone o repositório
-```bash
-git clone https://github.com/Sr-agente208/Pokemon_pokedex.git
-cd Pokemon_pokedex
-```
+## 🧭 Como usar
 
-2. Instale as dependências
-```bash
-npm install
-```
+1. Crie uma conta ou faça login.
+2. Pesquise seu Pokémon favorito.
+3. Toque em **Favoritar** para guardar sua descoberta.
+4. Visite **História** para explorar a cronologia da franquia.
+5. Use **Personalizar** para deixar a Pokédex com sua cara.
 
-3. Configure as variáveis de ambiente
-```bash
-cp .env.example .env
-# Edite o arquivo .env com suas credenciais do Railway
-```
+<details>
+<summary><strong>🔐 Configuração do Supabase</strong></summary>
 
-4. Inicie o servidor
-```bash
-npm start
-```
+O projeto usa Supabase para autenticação, recados, favoritos e perfis.
 
-## 📡 API Endpoints
+1. Crie um projeto no [Supabase](https://supabase.com/).
+2. Execute `supabase/schema.sql` no **SQL Editor**.
+3. Configure a URL e a chave pública no arquivo `public/supabase-client.js`.
+4. **Nunca** publique chaves `secret`, `service_role`, senhas ou connection strings.
 
-- `GET /` - Página principal
-- `GET /teste-banco` - Testa conexão com banco de dados
-- `GET /recados` - Lista todos os recados
-- `POST /recados` - Cria novo recado
-- `POST /cadastro` - Cadastra novo usuário
-- `POST /login` - Realiza login
-- `POST /favoritos` - Salva Pokémon nos favoritos
+</details>
 
-## 🗄️ Banco de Dados (Railway)
+## 🧰 Tecnologias
 
-Utiliza PostgreSQL hospedado no Railway. As variáveis de conexão estão em `.env`.
+- HTML, CSS e JavaScript
+- [PokéAPI](https://pokeapi.co/)
+- [Supabase](https://supabase.com/)
+- jsPDF
+- GitHub Pages
 
-## 🌐 Deployment
+## 👤 Criador e contato
 
-O projeto está configurado para rodar no [Railway](https://railway.app).
+Criado por [Sr Agente](https://github.com/Sr-agente208).
 
-```bash
-railway login
-railway up
-```
+- 💡 Sugestões e erros: [abra uma issue](https://github.com/Sr-agente208/Pokemon_pokedex/issues)
+- ✉️ Contato: use a página **Sobre** no site.
 
-## 📝 Licença
-
-Criado por Sr-agente208
+<div align="center">
+  <sub>Feito com ⚡ para fãs de Pokémon.</sub>
+</div>
