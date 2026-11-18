@@ -7,13 +7,28 @@
   /* Alertas próprios: alertas do navegador sempre mostram o domínio e não podem ser renomeados. */
   window.mostrarMensagem=function(texto){var caixa=document.getElementById('avisoPokedex');if(!caixa){caixa=document.createElement('div');caixa.id='avisoPokedex';caixa.style.cssText='position:fixed;z-index:99999;inset:0;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;padding:20px';caixa.innerHTML='<div style="background:#172033;color:#fff;width:min(420px,100%);padding:25px;border-radius:22px;box-shadow:0 10px 35px #000;text-align:center;border:2px solid #8b00b9"><h2 style="color:#fff;margin:0 0 18px">⚡ Pokédex</h2><p id="avisoPokedexTexto" style="font-size:18px;line-height:1.5"></p><button onclick="document.getElementById(\'avisoPokedex\').style.display=\'none\'" style="background:#6d008e;color:#fff;padding:11px 34px;border:1px solid #fff;border-radius:9px;font-size:16px">OK</button></div>';document.body.appendChild(caixa);}document.getElementById('avisoPokedexTexto').textContent=texto;caixa.style.display='flex';};
   window.alert=window.mostrarMensagem;
+  function erroConexao(error) {
+    var msg = error && (error.message || error.erro) || String(error || 'Erro desconhecido.');
+    if (/fetch|network|load failed|conexão com o servidor/i.test(msg)) {
+      return 'Não foi possível conectar ao Supabase. Verifique sua internet e tente novamente. Se continuar, o responsável deve verificar se o projeto está ativo no painel do Supabase. Sua conta não foi apagada; não é necessário limpar os dados.';
+    }
+    return msg;
+  }
   window.api = function (method, url, body, ok, fail) {
     /* Supabase: autenticação e banco sem Railway. */
     if (window.supabaseClient) {
-      var sb=window.supabaseClient, done=function(result){ if(result.error){if(fail)fail({erro:result.error.message});}else if(ok)ok(result.data); };
+      var sb=window.supabaseClient, done=function(result){ if(result.error){if(fail)fail({erro:erroConexao(result.error)});}else if(ok)ok(result.data); };
       var p = null;
       if(method==='POST' && url==='/cadastro') p = sb.auth.signUp({email:body.email,password:body.senha,options:{data:{nome:body.nome,cargo:body.cargo,codigo_verificacao:body.codigo_verificacao}}}).then(function(r){if(r.error){return done(r);}done({data:{sucesso:true,usuario:{id:r.data.user.id,nome:body.nome,email:body.email,cargo:'Usuário'}}});});
-      else if(method==='POST' && url==='/login') p = sb.auth.signInWithPassword({email:body.email,password:body.senha}).then(function(r){if(r.error)return done(r);sb.from('profiles').select('*').eq('id',r.data.user.id).single().then(function(p){if(p.error)return done(p);done({data:{sucesso:true,usuario:{id:p.data.id,nome:p.data.nome,email:p.data.email,cargo:p.data.cargo,token:r.data.session.access_token}}});}).catch(function(e){if(fail)fail({erro:e.message});});});
+      else if(method==='POST' && url==='/login') p = sb.auth.signInWithPassword({email:body.email,password:body.senha}).then(function(r){
+        if(r.error)return done(r);
+        if(!r.data || !r.data.user || !r.data.session)return done({error:{message:'Não foi possível validar a sessão. Tente entrar novamente.'}});
+        return sb.from('profiles').select('*').eq('id',r.data.user.id).single().then(function(profile){
+          if(profile.error)return done(profile);
+          if(!profile.data || profile.data.ativo===false)return done({error:{message:'Perfil indisponível ou desativado. Fale com o administrador.'}});
+          done({data:{sucesso:true,usuario:{id:profile.data.id,nome:profile.data.nome,email:profile.data.email,cargo:profile.data.cargo,token:r.data.session.access_token}}});
+        });
+      });
       else if(method==='GET' && url==='/recados') p = sb.from('recados').select('*').order('id',{ascending:false}).then(done);
       else if(method==='POST' && url==='/recados') p = sb.functions.invoke('moderate-recado',{body:{mensagem:body.mensagem||body.texto}}).then(function(r){if(r.error){if(fail)fail({erro:r.error.message||'Não foi possível analisar o recado.'});return;}if(r.data&&r.data.status!=='APPROVED'){if(fail)fail({erro:'Treinador Nébula: '+(r.data.reason||'recado precisa de revisão.')});return;}if(ok)ok(r.data);});
       else if(method==='DELETE' && url.indexOf('/recados/')===0) p = sb.rpc('delete_recado_as_staff',{target_id:Number(url.split('/').pop())}).then(function(r){if(r.error||!r.data){if(fail)fail({erro:r.error?r.error.message:'Não foi possível excluir este recado.'});return;}if(ok)ok({sucesso:true});});
@@ -27,11 +42,7 @@
       if (p && p.catch) {
         return p.catch(function(err) {
           if (fail) {
-            var msg = err && err.message ? err.message : String(err);
-            if (msg.indexOf("fetch") >= 0 || msg.indexOf("Failed to fetch") >= 0) {
-              msg = "⚠️ Conexão com o Supabase indisponível (projeto pausado ou sem internet).";
-            }
-            fail({erro: msg});
+            fail({erro: erroConexao(err)});
           }
         });
       }
@@ -79,7 +90,7 @@
   window.login = function (event) {
     if(event && event.preventDefault) event.preventDefault(); sincronizarContasLocais();
     var email=document.getElementById("email").value.replace(/^\s+|\s+$/g,""), senha=document.getElementById("senha").value;
-    api("POST","/login",{email:email,senha:senha},function(data){ if(data.sucesso){data.usuario.token=data.token||"";localStorage.setItem("logado","true");localStorage.setItem("usuarioLogado",JSON.stringify(data.usuario));window.location.href="index.html";}else alert(data.erro||"E-mail ou senha incorretos."); },function(data){ var users=localUsers(),i;for(i=0;i<users.length;i++)if(users[i].email===email&&users[i].senha===senha){localStorage.setItem("logado","true");localStorage.setItem("usuarioLogado",JSON.stringify(users[i]));window.location.href="index.html";return;}alert((data&&data.erro?data.erro:"Não foi possível entrar. Confira a conexão e os dados.")); }); return false;
+    api("POST","/login",{email:email,senha:senha},function(data){ if(data.sucesso){data.usuario.token=data.token||data.usuario.token||"";localStorage.setItem("logado","true");localStorage.setItem("usuarioLogado",JSON.stringify(data.usuario));window.location.href="index.html";}else alert(data.erro||"E-mail ou senha incorretos."); },function(data){ var users=window.supabaseClient?[]:localUsers(),i;for(i=0;i<users.length;i++)if(users[i].email===email&&users[i].senha===senha){localStorage.setItem("logado","true");localStorage.setItem("usuarioLogado",JSON.stringify(users[i]));window.location.href="index.html";return;}alert((data&&data.erro?data.erro:"Não foi possível entrar. Confira a conexão e os dados.")); }); return false;
   };
   window.sair=function(){localStorage.removeItem("logado");localStorage.removeItem("usuarioLogado");window.location.href="login.html";};
   window.limparDadosDispositivo=function(){
