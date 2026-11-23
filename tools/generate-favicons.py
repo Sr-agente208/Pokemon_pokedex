@@ -70,5 +70,5 @@ for folder in [root, root/'public', root/'docs']:
         path=folder/(page+'.html')
         html=path.read_text()
         html=re.sub(r'<link\b[^>]*rel=[\"\'](?:shortcut )?icon[\"\'][^>]*>', '', html, flags=re.I)
-        html=html.replace('</head>',f'<link rel="icon" type="image/png" sizes="64x64" href="icons/{name}-v4.png"></head>')
+        html=html.replace('</head>',f'<link rel="icon" type="image/png" sizes="64x64" href="icons/{name}-v4.png"></head>', 1)
         path.write_text(html)
