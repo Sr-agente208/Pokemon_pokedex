@@ -9,6 +9,8 @@
   window.alert=window.mostrarMensagem;
   function erroConexao(error) {
     var msg = error && (error.message || error.erro) || String(error || 'Erro desconhecido.');
+    if (/invalid login credentials/i.test(msg)) return 'E-mail ou senha incorretos. Use Esqueci minha senha na tela de login para recuperar o acesso.';
+    if (/email not confirmed/i.test(msg)) return 'Confirme seu e-mail pelo link recebido antes de entrar.';
     if (/fetch|network|load failed|conexão com o servidor/i.test(msg)) {
       return 'Não foi possível conectar ao Supabase. Verifique sua internet e tente novamente. Se continuar, o responsável deve verificar se o projeto está ativo no painel do Supabase. Sua conta não foi apagada; não é necessário limpar os dados.';
     }

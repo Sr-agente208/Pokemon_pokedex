@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Recuperar senha — Pokédex</title>
+  <link rel="stylesheet" href="style.css">
+  <style>[hidden] { display: none !important; }</style>
+</head>
+<body>
+<main class="login-box">
+  <h1>⚡ Pokédex</h1>
+  <h2>🔑 Recuperar senha</h2>
+  <p id="estadoRecuperacao" role="status" aria-live="polite">Informe o e-mail da sua conta. Não é necessário excluir ou cadastrar a conta novamente.</p>
+  <form id="solicitarRecuperacao">
+    <label for="emailRecuperacao">E-mail da conta</label>
+    <input id="emailRecuperacao" type="email" autocomplete="email" required>
+    <button type="submit">Enviar link por e-mail</button>
+  </form>
+  <form id="redefinirSenha" hidden>
+    <label for="novaSenha">Nova senha (mínimo de 8 caracteres)</label>
+    <input id="novaSenha" type="password" autocomplete="new-password" minlength="8" required>
+    <label for="confirmarSenha">Confirme a nova senha</label>
+    <input id="confirmarSenha" type="password" autocomplete="new-password" minlength="8" required>
+    <button type="submit">Salvar nova senha</button>
+  </form>
+  <p><a href="login.html">← Voltar ao login</a></p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+<script src="recuperar-senha.js"></script>
+</body>
+</html>
