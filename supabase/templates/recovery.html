@@ -12,10 +12,10 @@
         </td></tr>
         <tr><td style="padding:32px 28px;">
           <h2 style="margin:0 0 18px;font-size:24px;color:#512c99;">Vamos recuperar seu acesso? 🔑</h2>
-          <p style="font-size:16px;line-height:1.7;">Olá, Treinador!</p>
+          <p style="font-size:16px;line-height:1.7;">Olá, Treinador{{ with .Data }}{{ with index . "nome" }} {{ . }}{{ end }}{{ end }}!</p>
           <p style="font-size:16px;line-height:1.7;">Recebemos uma solicitação para redefinir a senha da sua conta na Pokédex. Clique no botão abaixo para escolher uma nova senha.</p>
           <table role="presentation" cellspacing="0" cellpadding="0" style="margin:26px auto;"><tr><td align="center" bgcolor="#713dcc" style="border-radius:10px;">
-            <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:17px 28px;border:1px solid #713dcc;border-radius:10px;color:#ffffff;text-decoration:none;font-size:17px;font-weight:bold;">Redefinir minha senha</a>
+            <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:17px 28px;border:1px solid #713dcc;border-radius:10px;color:#ffffff;text-decoration:none;font-size:17px;font-weight:bold;">Criar nova senha</a>
           </td></tr></table>
           <p style="font-size:14px;line-height:1.7;color:#50566a;">Este link é pessoal e temporário. Se ele expirar, solicite um novo pela opção <strong>Esqueci minha senha</strong> no site. Use somente o e-mail mais recente.</p>
           <p style="font-size:14px;line-height:1.7;color:#50566a;">Se o botão não funcionar, copie este endereço e cole no navegador:</p>
