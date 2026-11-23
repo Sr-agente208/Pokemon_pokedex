@@ -65,9 +65,10 @@ for folder in [root, root/'public', root/'docs']:
     for page,(name,top,pattern) in DESIGNS.items():
         image=png(top,pattern)
         (assets/(name+'.png')).write_bytes(image)
+        (assets/(name+'-v4.png')).write_bytes(image)
         (assets/(name+'.ico')).write_bytes(struct.pack('<HHH',0,1,1)+struct.pack('<BBBBHHII',64,64,0,0,1,32,len(image),22)+image)
         path=folder/(page+'.html')
         html=path.read_text()
         html=re.sub(r'<link\b[^>]*rel=[\"\'](?:shortcut )?icon[\"\'][^>]*>', '', html, flags=re.I)
-        html=html.replace('</head>',f'<link rel="icon" type="image/png" sizes="64x64" href="icons/{name}.png?v=3"><link rel="icon" href="icons/{name}.ico?v=3" sizes="any"></head>')
+        html=html.replace('</head>',f'<link rel="icon" type="image/png" sizes="64x64" href="icons/{name}-v4.png"></head>')
         path.write_text(html)
