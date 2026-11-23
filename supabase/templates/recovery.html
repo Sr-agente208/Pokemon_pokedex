@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recupere seu acesso à Pokédex</title></head>
+<body style="margin:0;padding:0;background-color:#eef0fa;font-family:Arial,Helvetica,sans-serif;color:#172033;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Escolha uma nova senha e volte à sua jornada na Pokédex.</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#eef0fa;">
+    <tr><td align="center" style="padding:32px 16px;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background-color:#ffffff;border-radius:20px;overflow:hidden;">
+        <tr><td align="center" style="background-color:#172033;padding:30px 24px;border-bottom:4px solid #8b39d3;">
+          <h1 style="margin:0;font-size:30px;color:#ffffff;">⚡ Pokédex</h1>
+          <p style="margin:10px 0 0;font-size:14px;color:#d4c8ff;">Sua próxima aventura começa aqui</p>
+        </td></tr>
+        <tr><td style="padding:32px 28px;">
+          <h2 style="margin:0 0 18px;font-size:24px;color:#512c99;">Vamos recuperar seu acesso? 🔑</h2>
+          <p style="font-size:16px;line-height:1.7;">Olá, Treinador!</p>
+          <p style="font-size:16px;line-height:1.7;">Recebemos uma solicitação para redefinir a senha da sua conta na Pokédex. Clique no botão abaixo para escolher uma nova senha.</p>
+          <table role="presentation" cellspacing="0" cellpadding="0" style="margin:26px auto;"><tr><td align="center" bgcolor="#713dcc" style="border-radius:10px;">
+            <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:17px 28px;border:1px solid #713dcc;border-radius:10px;color:#ffffff;text-decoration:none;font-size:17px;font-weight:bold;">Redefinir minha senha</a>
+          </td></tr></table>
+          <p style="font-size:14px;line-height:1.7;color:#50566a;">Este link é pessoal e temporário. Se ele expirar, solicite um novo pela opção <strong>Esqueci minha senha</strong> no site. Use somente o e-mail mais recente.</p>
+          <p style="font-size:14px;line-height:1.7;color:#50566a;">Se o botão não funcionar, copie este endereço e cole no navegador:</p>
+          <p style="font-size:12px;line-height:1.6;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#713dcc;">{{ .ConfirmationURL }}</a></p>
+          <p style="margin-top:24px;padding:16px;background-color:#f3effd;border-radius:10px;font-size:14px;line-height:1.7;">Não solicitou essa alteração? Ignore este e-mail. Sua senha só será alterada quando você concluir a redefinição. Nunca compartilhe este link, sua senha ou códigos de acesso.</p>
+        </td></tr>
+        <tr><td align="center" style="padding:20px 24px;background-color:#f7f7fc;color:#72778a;font-size:12px;line-height:1.7;">Pokédex • Projeto de fã independente<br>Não afiliado à Nintendo, Game Freak ou The Pokémon Company.</td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
